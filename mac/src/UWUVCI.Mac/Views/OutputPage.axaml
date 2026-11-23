@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:UWUVCI.Mac.ViewModels"
+             x:Class="UWUVCI.Mac.Views.OutputPage"
+             x:DataType="vm:MainViewModel">
+  <StackPanel Spacing="24">
+    <StackPanel Spacing="4">
+      <TextBlock Text="Output and inject" Classes="title" />
+      <TextBlock Classes="muted" Text="The finished title is written to a new folder inside the output folder." />
+    </StackPanel>
+
+    <Border Classes="card">
+      <StackPanel Spacing="8">
+        <TextBlock Text="Output folder" Classes="label" />
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <TextBox Text="{Binding Inject.OutputDir}" AutomationProperties.Name="Output folder" />
+          <Button Grid.Column="1" Content="Choose..." Click="OnChoose" AutomationProperties.Name="Choose output folder" />
+        </Grid>
+        <TextBlock Text="{Binding Inject.OutputError}" Classes="error"
+                   IsVisible="{Binding Inject.OutputError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      </StackPanel>
+    </Border>
+
+    <Border Classes="card">
+      <StackPanel Spacing="12">
+        <TextBlock Text="Summary" Classes="section" />
+        <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+          <TextBlock Text="ROM" Classes="muted" />
+          <TextBlock Grid.Column="1" Text="{Binding Inject.RomName}" TextWrapping="Wrap" />
+          <TextBlock Grid.Row="1" Text="Game name" Classes="muted" />
+          <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Inject.GameName}" TextWrapping="Wrap" />
+          <TextBlock Grid.Row="2" Text="Base" Classes="muted" />
+          <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Inject.BaseDir}" TextTrimming="CharacterEllipsis" />
+        </Grid>
+        <StackPanel Spacing="8" IsVisible="{Binding !Inject.HasCommonKey}">
+          <TextBlock Classes="error" Text="Packing needs your Wii U common key." />
+          <Button Content="Open Settings" Command="{Binding OpenSettingsCommand}" HorizontalAlignment="Left" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

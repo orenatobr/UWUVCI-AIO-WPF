@@ -1,0 +1,117 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:UWUVCI.Mac.ViewModels"
+        xmlns:v="using:UWUVCI.Mac.Views"
+        x:Class="UWUVCI.Mac.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="UWUVCI for macOS"
+        Width="1080" Height="720" MinWidth="960" MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WindowBg}"
+        KeyDown="OnKeyDown">
+
+  <Grid ColumnDefinitions="248,*">
+
+    <!-- Sidebar -->
+    <Border Grid.Column="0" Background="{DynamicResource SidebarBg}" IsEnabled="{Binding !IsOverlayOpen}"
+            BorderBrush="{DynamicResource Divider}" BorderThickness="0,0,1,0">
+      <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Top" Margin="12,16,12,24" Spacing="2">
+          <TextBlock Text="UWUVCI" FontSize="20" FontWeight="Bold" />
+          <TextBlock Text="Wii U VC injector for macOS" Classes="muted" />
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Spacing="4">
+          <Button Classes="step" Command="{Binding OpenSettingsCommand}" AutomationProperties.Name="Open settings">
+            <TextBlock Text="Settings" />
+          </Button>
+          <Button Classes="step" Command="{Binding OpenAboutCommand}" AutomationProperties.Name="Open about and FAQ">
+            <TextBlock Text="About and FAQ" />
+          </Button>
+        </StackPanel>
+
+        <ItemsControl ItemsSource="{Binding Steps}" IsVisible="{Binding IsWizard}"
+                      AutomationProperties.Name="Steps">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:StepItem">
+              <Button Classes="step" Classes.current="{Binding IsCurrent}"
+                      IsEnabled="{Binding IsEnabled}" Click="OnStepClick"
+                      AutomationProperties.Name="{Binding Title}">
+                <Grid ColumnDefinitions="28,*">
+                  <Border Width="24" Height="24" CornerRadius="12" VerticalAlignment="Center"
+                          BorderBrush="{DynamicResource CardBorder}" BorderThickness="1"
+                          Background="{DynamicResource CardBg}">
+                    <Panel>
+                      <TextBlock Text="{Binding Number}" FontSize="12" HorizontalAlignment="Center"
+                                 VerticalAlignment="Center" IsVisible="{Binding !IsComplete}" />
+                      <Path Data="M6,12.5 L10.5,17 L18,8" Stroke="{DynamicResource SuccessText}" StrokeThickness="2"
+                            StrokeLineCap="Round" StrokeJoin="Round" Stretch="Uniform" Margin="5"
+                            IsVisible="{Binding IsComplete}" />
+                    </Panel>
+                  </Border>
+                  <TextBlock Grid.Column="1" Text="{Binding Title}" Margin="8,0,0,0" VerticalAlignment="Center"
+                             FontWeight="{Binding IsCurrent, Converter={x:Static v:Converters.BoldIf}}" />
+                </Grid>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </DockPanel>
+    </Border>
+
+    <!-- Content -->
+    <Panel Grid.Column="1">
+
+      <Panel IsEnabled="{Binding !IsOverlayOpen}">
+      <!-- Wizard -->
+      <Grid RowDefinitions="*,Auto" IsVisible="{Binding IsWizard}">
+        <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Disabled">
+          <Panel Margin="40,32,40,16" MaxWidth="760" HorizontalAlignment="Stretch">
+            <v:ConsolePage IsVisible="{Binding Step, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:WizardStep.Console}}" />
+            <v:RomPage IsVisible="{Binding Step, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:WizardStep.Rom}}" />
+            <v:BasePage IsVisible="{Binding Step, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:WizardStep.Base}}" />
+            <v:DetailsPage IsVisible="{Binding Step, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:WizardStep.Details}}" />
+            <v:OptionsPage IsVisible="{Binding Step, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:WizardStep.Options}}" />
+            <v:OutputPage IsVisible="{Binding Step, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:WizardStep.Output}}" />
+          </Panel>
+        </ScrollViewer>
+
+        <Border Grid.Row="1" Background="{DynamicResource SidebarBg}" BorderBrush="{DynamicResource Divider}"
+                BorderThickness="0,1,0,0" Padding="40,16">
+          <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+            <Button Grid.Column="0" Content="Back" Command="{Binding BackCommand}"
+                    IsVisible="{Binding !IsFirstStep}" />
+            <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center" Spacing="2">
+              <TextBlock Text="{Binding Inject.ErrorMessage}" Classes="error"
+                         IsVisible="{Binding Inject.ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+              <TextBlock Text="{Binding NextHint}" Classes="muted"
+                         IsVisible="{Binding NextHint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            </StackPanel>
+            <Button Grid.Column="2" Content="Continue" Classes="accent" Command="{Binding NextCommand}"
+                    IsVisible="{Binding !IsLastStep}" MinWidth="120" />
+            <Button Grid.Column="3" Content="Inject" Classes="accent" Command="{Binding Inject.InjectCommand}"
+                    IsVisible="{Binding IsLastStep}" MinWidth="200" MinHeight="48" FontSize="16" FontWeight="SemiBold"
+                    HorizontalContentAlignment="Center" AutomationProperties.Name="Inject the game" />
+          </Grid>
+        </Border>
+      </Grid>
+
+      <!-- Running -->
+      <v:RunningView IsVisible="{Binding IsRunning}" />
+
+      <!-- Done -->
+      <v:DoneView IsVisible="{Binding IsDone}" />
+      </Panel>
+
+      <!-- Sheets -->
+      <Panel IsVisible="{Binding IsSettingsOpen}">
+        <Border Background="#99000000" />
+        <v:SettingsSheet HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Panel>
+      <Panel IsVisible="{Binding IsAboutOpen}">
+        <Border Background="#99000000" />
+        <v:AboutSheet HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Panel>
+    </Panel>
+  </Grid>
+</Window>

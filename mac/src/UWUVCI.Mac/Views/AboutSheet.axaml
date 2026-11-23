@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:UWUVCI.Mac.ViewModels"
+             x:Class="UWUVCI.Mac.Views.AboutSheet"
+             x:DataType="vm:MainViewModel">
+  <Border Classes="card" Width="620" Padding="32" BoxShadow="0 8 32 0 #40000000"
+          AutomationProperties.Name="About and FAQ">
+    <StackPanel Spacing="16">
+      <TextBlock Text="About and FAQ" Classes="title" />
+      <ScrollViewer MaxHeight="400" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="16" Margin="0,0,16,0">
+          <TextBlock TextWrapping="Wrap"
+                     Text="This is a native macOS port of UWUVCI, a tool that injects a game into a Wii U Virtual Console title. You bring your own legally obtained ROM, base game and keys. The app ships none of them and does not download any ROM." />
+
+          <StackPanel Spacing="4">
+            <TextBlock Text="Why only Nintendo 64?" Classes="label" />
+            <TextBlock Classes="muted" Text="It is the only console implemented in the macOS build so far. The other consoles are listed but disabled until their conversion steps are ported." />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Where do I get a base?" Classes="label" />
+            <TextBlock Classes="muted" Text="Use a base you are entitled to. Either point to a decrypted folder (code, content, meta) or enter its title id and title key to download and decrypt it with your common key." />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Where is my common key kept?" Classes="label" />
+            <TextBlock Classes="muted" Text="In ~/Library/Application Support/UWUVCI/settings.json, readable only by your user. It is never written to the log." />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="What does the Expansion Pak option do?" Classes="label" />
+            <TextBlock Classes="muted" Text="It adds a RAM size line to the game ini. It is experimental: games that need the Expansion Pak are rated as not working in the community list, and this does not change that guarantee." />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Where is the log?" Classes="label" />
+            <TextBlock Classes="muted" Text="~/Library/Logs/UWUVCI/uwuvci.log" />
+          </StackPanel>
+        </StackPanel>
+      </ScrollViewer>
+      <Button Content="Close" Classes="accent" Command="{Binding CloseOverlayCommand}" HorizontalAlignment="Right"
+              MinWidth="96" />
+    </StackPanel>
+  </Border>
+</UserControl>

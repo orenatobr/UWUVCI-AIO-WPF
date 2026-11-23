@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:UWUVCI.Mac.ViewModels"
+             x:Class="UWUVCI.Mac.Views.RomPage"
+             x:DataType="vm:MainViewModel">
+  <StackPanel Spacing="24">
+    <StackPanel Spacing="4">
+      <TextBlock Text="Choose your ROM" Classes="title" />
+      <TextBlock Classes="muted"
+                 Text="Use a ROM you legally own. The app ships none. It is read here only to recognise the game." />
+    </StackPanel>
+
+    <Button x:Name="DropZone" Classes="drop" Click="OnChoose" DragDrop.AllowDrop="True"
+            AutomationProperties.Name="Choose an N64 ROM file, or drop one here">
+      <StackPanel Spacing="4" HorizontalAlignment="Center">
+        <TextBlock Text="Drop a ROM here, or choose a file" Classes="section" HorizontalAlignment="Center" />
+        <TextBlock Text="Accepts .z64, .v64 and .n64 up to 128 MiB" Classes="muted" HorizontalAlignment="Center" />
+      </StackPanel>
+    </Button>
+
+    <TextBlock Text="{Binding Inject.RomError}" Classes="error"
+               IsVisible="{Binding Inject.RomError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+    <Border Classes="card" IsVisible="{Binding Inject.HasRom}" AutomationProperties.Name="Detected game">
+      <StackPanel Spacing="16">
+        <StackPanel Spacing="2">
+          <TextBlock Text="{Binding Inject.RomName}" Classes="section" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding Inject.RomFileName}" Classes="muted" />
+          <TextBlock Classes="muted" IsVisible="{Binding !Inject.RomInDatabase}"
+                     Text="Not in the game database. The header title is used and the default profile applies." />
+        </StackPanel>
+
+        <Grid ColumnDefinitions="180,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
+          <TextBlock Grid.Row="0" Text="Region" Classes="muted" />
+          <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Inject.RomRegion}" />
+          <TextBlock Grid.Row="1" Text="Save type" Classes="muted" />
+          <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Inject.RomSave}" />
+          <TextBlock Grid.Row="2" Text="Controller accessory" Classes="muted" />
+          <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Inject.RomControllers}" />
+          <TextBlock Grid.Row="3" Text="Expansion Pak" Classes="muted" />
+          <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Inject.RomExpansionPak}" />
+        </Grid>
+
+        <Expander Header="Ini preview (read only)" IsExpanded="{Binding Inject.IsIniPreviewOpen}"
+                  HorizontalAlignment="Stretch">
+          <TextBox Text="{Binding Inject.IniPreview, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True"
+                   FontFamily="Menlo,Monaco,monospace" FontSize="12" MinHeight="140" MaxHeight="260"
+                   AutomationProperties.Name="Ini that will be written" />
+        </Expander>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

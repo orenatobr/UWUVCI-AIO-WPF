@@ -338,3 +338,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+# macOS port
+mac/**/bin/
+mac/**/obj/
+.DS_Store

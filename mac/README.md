@@ -41,9 +41,22 @@ Set `UWUVCI_SCREENSHOT_DIR` before `dotnet test` to keep the PNGs rendered by th
 - Headless Skia tests render each page in light and dark and fail if the XAML does not load. Screenshots are in `docs/screenshots`.
 - The app was launched with `dotnet run` on macOS and its window rendered.
 
+## End to end check
+
+`tests/UWUVCI.Mac.Tests/EndToEndTests.cs` drives the real view model and service with no fakes: it downloads the
+native template, injects a ROM you own, packs the title and checks the output (title files, SD folder, no ROM
+inside the title). It does nothing unless `UWUVCI_E2E_ROM` points at a ROM:
+
+```
+UWUVCI_E2E_ROM=/path/to/game.z64 dotnet test tests/UWUVCI.Mac.Tests --filter EndToEndTests
+```
+
+It passed with a Conker ROM. The packed title is encrypted, so it was not booted; the same title layout built
+unpacked by `uwuvci-cli native-layout` was booted in Cemu (see `docs/COMPATIBILITY.md`).
+
 ## What is not verified
 
-- A full inject against a real base and a real ROM was not run from the UI. Core has its own tests with synthetic data.
+- A full Nintendo Virtual Console inject against a real base was not run, because it needs a base title and its key. The native engine was run end to end through the real view model and inject service with a real ROM (see below), but not by clicking through the window.
 - Downloading a base from the Nintendo CDN was not run.
 - The native engine from the UI (template download, pack, SD folder) was not run end to end. The view model and service wiring are covered with a fake service, and the Core native path is covered by its own tests. `InjectService.InjectNativeAsync` has no automated test.
 - Drag and drop and the native file panels were not exercised by hand or by automation.

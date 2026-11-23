@@ -7,7 +7,7 @@ You bring your own legally obtained ROM, base game and keys. The app ships none 
 
 ## Scope
 
-Only Nintendo 64 works today. The other consoles are listed in the picker but disabled, because Core does not implement them yet.
+Only Nintendo 64 works today. The other consoles are listed in the picker but disabled, because Core does not implement them yet. Each card has a small line art icon (a pad, handheld or keyboard silhouette drawn as vector geometry, no logos) in its own accent colour.
 
 The flow is a single window with a step list: console, ROM, base, name and images, N64 options, output. You can drop a ROM or choose one, and a card shows what was detected (game, region, save type, controller accessory, Expansion Pak) with a read only preview of the ini that will be written. The base is chosen from a dropdown of the 23 N64 Virtual Console bases, as in the original UWUVCI. Choosing one downloads it automatically: the first time you type that base's title key (the app checks it against a stored hash and ships no keys), it is saved in `settings.json` and later picks download with no prompt. A base already downloaded under the app folder is reused at once. Downloads need the common key from Settings. A decrypted folder (`code`, `content`, `meta`) is still available below the dropdown as a secondary option. The Wii U common key is set once in Settings.
 

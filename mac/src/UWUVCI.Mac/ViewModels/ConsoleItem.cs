@@ -21,6 +21,11 @@ public sealed partial class ConsoleItem(GameConsole console, string name, bool a
     /// <summary>True when the macOS build can inject for this console.</summary>
     public bool Available { get; } = available;
 
+    /// <summary>
+    /// Key of the card icon: the geometry is the resource <c>Icon.{key}</c> and its colour <c>Console.{key}</c>.
+    /// </summary>
+    public string IconKey { get; } = console.ToString().ToLowerInvariant();
+
     /// <summary>Short line under the name.</summary>
     public string Note { get; } = note;
 

@@ -5,6 +5,16 @@
 
   <Application.Resources>
     <ResourceDictionary>
+      <!-- Console card icons: 24 x 24 line art, stroked in the console accent colour. -->
+      <StreamGeometry x:Key="Icon.nes">M4,7 H20 A2,2 0 0 1 22,9 V15 A2,2 0 0 1 20,17 H4 A2,2 0 0 1 2,15 V9 A2,2 0 0 1 4,7 Z M6,10 V14 M4,12 H8 M10.5,14.5 H12.3 M13.3,14.5 H15.1 M17,12.4 A1,1 0 1 0 19,12.4 A1,1 0 1 0 17,12.4 Z M19.6,12.4 L19.61,12.4</StreamGeometry>
+      <StreamGeometry x:Key="Icon.snes">M6,7 H18 A4,4 0 0 1 22,11 V13 A4,4 0 0 1 18,17 H6 A4,4 0 0 1 2,13 V11 A4,4 0 0 1 6,7 Z M7,9.3 V14.7 M4.3,12 H9.7 M17,9.9 L17.01,9.9 M17,14.1 L17.01,14.1 M14.9,12 L14.91,12 M19.1,12 L19.11,12</StreamGeometry>
+      <StreamGeometry x:Key="Icon.n64">M6,5 H18 C20,5 21,6.5 21,8.5 V16 C21,18.5 20,20 18.5,20 C17,20 16,19 16,17.5 V14 H8 V17.5 C8,19 7,20 5.5,20 C4,20 3,18.5 3,16 V8.5 C3,6.5 4,5 6,5 Z M10,14 V18.5 Q12,20.5 14,18.5 V14 M5.4,8 V11 M3.9,9.5 H6.9 M10.6,9.5 A1.4,1.4 0 1 0 13.4,9.5 A1.4,1.4 0 1 0 10.6,9.5 Z M16.5,8.4 L16.51,8.4 M18.5,10.6 L18.51,10.6</StreamGeometry>
+      <StreamGeometry x:Key="Icon.gba">M5,6 H19 A3.5,3.5 0 0 1 22.5,9.5 V14.5 A3.5,3.5 0 0 1 19,18 H5 A3.5,3.5 0 0 1 1.5,14.5 V9.5 A3.5,3.5 0 0 1 5,6 Z M8,8.5 H16 V15.5 H8 Z M4.7,10.4 V13.6 M3.1,12 H6.3 M18.7,13.4 L18.71,13.4 M20.4,10.9 L20.41,10.9</StreamGeometry>
+      <StreamGeometry x:Key="Icon.nds">M5,3 H19 A2,2 0 0 1 21,5 V19 A2,2 0 0 1 19,21 H5 A2,2 0 0 1 3,19 V5 A2,2 0 0 1 5,3 Z M3,12 H21 M7,5.5 H17 V9.5 H7 Z M7,14.5 H17 V18.5 H7 Z</StreamGeometry>
+      <StreamGeometry x:Key="Icon.tg16">M6,3 H15 L19,7 V20 A1,1 0 0 1 18,21 H6 A1,1 0 0 1 5,20 V4 A1,1 0 0 1 6,3 Z M8,7 H15 V12 H8 Z M8,16.5 V19 M10.7,16.5 V19 M13.3,16.5 V19 M16,16.5 V19</StreamGeometry>
+      <StreamGeometry x:Key="Icon.msx">M4,6 H20 A2,2 0 0 1 22,8 V16 A2,2 0 0 1 20,18 H4 A2,2 0 0 1 2,16 V8 A2,2 0 0 1 4,6 Z M5,9.5 H6.2 M8.6,9.5 H9.8 M12.2,9.5 H13.4 M15.8,9.5 H17 M19.4,9.5 H20.2 M6.8,12 H8 M10.4,12 H11.6 M14,12 H15.2 M17.6,12 H18.8 M7.5,15 H16.5</StreamGeometry>
+      <StreamGeometry x:Key="Icon.wii">M9.5,2 H14.5 A1.5,1.5 0 0 1 16,3.5 V20.5 A1.5,1.5 0 0 1 14.5,22 H9.5 A1.5,1.5 0 0 1 8,20.5 V3.5 A1.5,1.5 0 0 1 9.5,2 Z M11,5 A1,1 0 1 0 13,5 A1,1 0 1 0 11,5 Z M12,7.7 V10.9 M10.4,9.3 H13.6 M10.6,13.8 A1.4,1.4 0 1 0 13.4,13.8 A1.4,1.4 0 1 0 10.6,13.8 Z M10.5,17.2 H13.5 M10.5,19.4 H13.5</StreamGeometry>
+      <StreamGeometry x:Key="Icon.gamecube">M7,6 H17 C20,6 22,8.5 22,11.5 C22,15 21,19 18.5,19 C17,19 16,17.5 15,16.5 H9 C8,17.5 7,19 5.5,19 C3,19 2,15 2,11.5 C2,8.5 4,6 7,6 Z M5.2,10.2 A1.8,1.8 0 1 0 8.8,10.2 A1.8,1.8 0 1 0 5.2,10.2 Z M15.9,10.4 A1.6,1.6 0 1 0 19.1,10.4 A1.6,1.6 0 1 0 15.9,10.4 Z M10,13.6 V15.4 M9.1,14.5 H10.9 M13.8,13.8 L13.81,13.8</StreamGeometry>
       <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
           <Color x:Key="WindowBgColor">#F5F5F7</Color>
@@ -24,6 +34,15 @@
           <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="#E3E3E9" />
           <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#DADAE0" />
           <SolidColorBrush x:Key="ExpanderContentBackground" Color="Transparent" />
+          <SolidColorBrush x:Key="Console.nes" Color="#B3261E" />
+          <SolidColorBrush x:Key="Console.snes" Color="#9C3A7A" />
+          <SolidColorBrush x:Key="Console.n64" Color="#17692E" />
+          <SolidColorBrush x:Key="Console.gba" Color="#4338CA" />
+          <SolidColorBrush x:Key="Console.nds" Color="#0B6B73" />
+          <SolidColorBrush x:Key="Console.tg16" Color="#A84F00" />
+          <SolidColorBrush x:Key="Console.msx" Color="#1D5FB4" />
+          <SolidColorBrush x:Key="Console.wii" Color="#0F6A8C" />
+          <SolidColorBrush x:Key="Console.gamecube" Color="#6D3FC4" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
           <Color x:Key="WindowBgColor">#1B1B1E</Color>
@@ -43,6 +62,15 @@
           <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="#34343A" />
           <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#3C3C42" />
           <SolidColorBrush x:Key="ExpanderContentBackground" Color="Transparent" />
+          <SolidColorBrush x:Key="Console.nes" Color="#FF8A80" />
+          <SolidColorBrush x:Key="Console.snes" Color="#E49AD0" />
+          <SolidColorBrush x:Key="Console.n64" Color="#6FD58C" />
+          <SolidColorBrush x:Key="Console.gba" Color="#A5A0FF" />
+          <SolidColorBrush x:Key="Console.nds" Color="#5FD3D9" />
+          <SolidColorBrush x:Key="Console.tg16" Color="#FFB366" />
+          <SolidColorBrush x:Key="Console.msx" Color="#7DB4FF" />
+          <SolidColorBrush x:Key="Console.wii" Color="#7CD0F0" />
+          <SolidColorBrush x:Key="Console.gamecube" Color="#C4A3FF" />
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
     </ResourceDictionary>
@@ -132,6 +160,65 @@
     <Style Selector="Button.tile:disabled /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="Foreground" Value="{DynamicResource Muted}" />
+    </Style>
+
+
+    <!-- Console icon tile: 40 px, accent per console chosen by the Tag of the path -->
+    <Style Selector="Border.iconTile">
+      <Setter Property="Width" Value="40" />
+      <Setter Property="Height" Value="40" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Background" Value="{DynamicResource CodeBg}" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <Style Selector="Button.tile:disabled Border.iconTile">
+      <Setter Property="Opacity" Value="0.75" />
+    </Style>
+    <Style Selector="Path.consoleIcon">
+      <Setter Property="Width" Value="30" />
+      <Setter Property="Height" Value="30" />
+      <Setter Property="Stretch" Value="Uniform" />
+      <Setter Property="StrokeThickness" Value="1.6" />
+      <Setter Property="StrokeLineCap" Value="Round" />
+      <Setter Property="StrokeJoin" Value="Round" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Path.consoleIcon[Tag=nes]">
+      <Setter Property="Data" Value="{StaticResource Icon.nes}" />
+      <Setter Property="Stroke" Value="{DynamicResource Console.nes}" />
+    </Style>
+    <Style Selector="Path.consoleIcon[Tag=snes]">
+      <Setter Property="Data" Value="{StaticResource Icon.snes}" />
+      <Setter Property="Stroke" Value="{DynamicResource Console.snes}" />
+    </Style>
+    <Style Selector="Path.consoleIcon[Tag=n64]">
+      <Setter Property="Data" Value="{StaticResource Icon.n64}" />
+      <Setter Property="Stroke" Value="{DynamicResource Console.n64}" />
+    </Style>
+    <Style Selector="Path.consoleIcon[Tag=gba]">
+      <Setter Property="Data" Value="{StaticResource Icon.gba}" />
+      <Setter Property="Stroke" Value="{DynamicResource Console.gba}" />
+    </Style>
+    <Style Selector="Path.consoleIcon[Tag=nds]">
+      <Setter Property="Data" Value="{StaticResource Icon.nds}" />
+      <Setter Property="Stroke" Value="{DynamicResource Console.nds}" />
+    </Style>
+    <Style Selector="Path.consoleIcon[Tag=tg16]">
+      <Setter Property="Data" Value="{StaticResource Icon.tg16}" />
+      <Setter Property="Stroke" Value="{DynamicResource Console.tg16}" />
+    </Style>
+    <Style Selector="Path.consoleIcon[Tag=msx]">
+      <Setter Property="Data" Value="{StaticResource Icon.msx}" />
+      <Setter Property="Stroke" Value="{DynamicResource Console.msx}" />
+    </Style>
+    <Style Selector="Path.consoleIcon[Tag=wii]">
+      <Setter Property="Data" Value="{StaticResource Icon.wii}" />
+      <Setter Property="Stroke" Value="{DynamicResource Console.wii}" />
+    </Style>
+    <Style Selector="Path.consoleIcon[Tag=gamecube]">
+      <Setter Property="Data" Value="{StaticResource Icon.gamecube}" />
+      <Setter Property="Stroke" Value="{DynamicResource Console.gamecube}" />
     </Style>
 
     <!-- Sidebar rows -->

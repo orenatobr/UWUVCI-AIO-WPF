@@ -19,10 +19,13 @@
       <ItemsControl.ItemTemplate>
         <DataTemplate x:DataType="vm:ConsoleItem">
           <Button Classes="tile" Classes.selected="{Binding IsSelected}" IsEnabled="{Binding Available}"
-                  Margin="0,0,12,12" MinHeight="112" Click="OnTileClick"
+                  Margin="0,0,12,12" MinHeight="150" Click="OnTileClick"
                   AutomationProperties.Name="{Binding Name}"
                   AutomationProperties.HelpText="{Binding Note}">
-            <StackPanel Spacing="6" VerticalAlignment="Top">
+            <StackPanel Spacing="8" VerticalAlignment="Top">
+              <Border Classes="iconTile" AutomationProperties.Name="{Binding Name, StringFormat='{}{0} icon'}">
+                <Path Classes="consoleIcon" Tag="{Binding IconKey}" />
+              </Border>
               <TextBlock Text="{Binding Name}" Classes="section" />
               <TextBlock Text="{Binding Note}" Classes="muted" />
             </StackPanel>

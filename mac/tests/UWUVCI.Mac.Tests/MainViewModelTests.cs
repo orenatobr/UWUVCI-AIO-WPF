@@ -197,4 +197,13 @@ public class MainViewModelTests
         Make(f, revealed.Add).ShowSdInFinderCommand.Execute(null);
         Assert.Empty(revealed);
     }
+
+    [Fact]
+    public void EveryConsole_HasAnIconKey()
+    {
+        var items = ConsoleItem.All();
+        Assert.Equal(Enum.GetValues<UWUVCI.Core.Injection.GameConsole>().Length, items.Count);
+        Assert.All(items, i => Assert.False(string.IsNullOrWhiteSpace(i.IconKey)));
+        Assert.Equal(items.Count, items.Select(i => i.IconKey).Distinct().Count());
+    }
 }

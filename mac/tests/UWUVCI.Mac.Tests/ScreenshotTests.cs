@@ -167,4 +167,20 @@ public class ScreenshotTests
         f.Settings.CommonKey = "";
         f.Vm.ChooseBaseAsync(f.Vm.BaseOptions.Single(o => o.Base == Demo)).GetAwaiter().GetResult();
     }, [Demo]);
+
+    [Fact]
+    public Task ConsoleIcons_HaveGeometryAndAccentInBothThemes() => Session.Value.Dispatch(() =>
+    {
+        var app = Application.Current!;
+        foreach (var item in ConsoleItem.All())
+        {
+            Assert.True(app.TryGetResource("Icon." + item.IconKey, null, out var geo), item.IconKey);
+            Assert.IsAssignableFrom<Avalonia.Media.Geometry>(geo);
+            foreach (var theme in new[] { ThemeVariant.Light, ThemeVariant.Dark })
+                Assert.True(app.TryGetResource("Console." + item.IconKey, theme, out _), item.IconKey + " " + theme);
+        }
+    }, CancellationToken.None);
+
+    [Fact]
+    public Task ConsolePage_Dark() => Render("14-console-dark", ThemeVariant.Dark, (_, vm) => SelectN64(vm));
 }

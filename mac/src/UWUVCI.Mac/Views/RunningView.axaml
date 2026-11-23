@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:UWUVCI.Mac.ViewModels"
+             xmlns:v="using:UWUVCI.Mac.Views"
+             x:Class="UWUVCI.Mac.Views.RunningView"
+             x:DataType="vm:MainViewModel">
+  <Border Classes="card" Width="520" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <StackPanel Spacing="16">
+      <TextBlock Text="Injecting" Classes="title" />
+      <ProgressBar Value="{Binding Inject.Percent}" Maximum="100" Height="8"
+                   AutomationProperties.Name="Inject progress" />
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Text="{Binding Inject.ProgressMessage}" />
+        <TextBlock Grid.Column="1" Text="{Binding Inject.Percent, Converter={x:Static v:Converters.Percent}}"
+                   Classes="muted" />
+      </Grid>
+      <TextBlock Classes="muted"
+                 Text="Cancel stops the inject at the end of the current step and leaves nothing behind." />
+      <Button Content="Cancel" Command="{Binding Inject.CancelCommand}" HorizontalAlignment="Left" />
+    </StackPanel>
+  </Border>
+</UserControl>

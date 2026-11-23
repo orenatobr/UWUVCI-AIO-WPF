@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:UWUVCI.Mac.ViewModels"
+             x:Class="UWUVCI.Mac.Views.BasePage"
+             x:DataType="vm:MainViewModel">
+  <StackPanel Spacing="24">
+    <StackPanel Spacing="4">
+      <TextBlock Text="Choose a base" Classes="title" />
+      <TextBlock Classes="muted"
+                 Text="The base is the Wii U game your ROM is injected into. You supply it. The app ships none." />
+    </StackPanel>
+
+    <Border Classes="card" IsVisible="{Binding Inject.IsNative}">
+      <TextBlock Classes="muted" TextWrapping="Wrap"
+                 Text="Not needed. The native engine does not use a Nintendo base." />
+    </Border>
+
+    <StackPanel Spacing="24" IsVisible="{Binding Inject.IsBaseRequired}">
+    <Border Classes="card">
+      <StackPanel Spacing="12">
+        <TextBlock Text="Use a decrypted base folder" Classes="section" />
+        <TextBlock Classes="muted" Text="The folder must contain code, content and meta." />
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <Button Content="Choose folder..." Click="OnChooseFolder" AutomationProperties.Name="Choose base folder" />
+          <TextBlock Text="{Binding Inject.BaseDir}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                     MaxWidth="460" IsVisible="{Binding Inject.IsBaseValid}" />
+        </StackPanel>
+        <TextBlock Text="Base ready." Foreground="{DynamicResource SuccessText}"
+                   IsVisible="{Binding Inject.IsBaseValid}" />
+        <TextBlock Text="{Binding Inject.BaseError}" Classes="error"
+                   IsVisible="{Binding Inject.BaseError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      </StackPanel>
+    </Border>
+
+    <Border Classes="card">
+      <StackPanel Spacing="12">
+        <TextBlock Text="Or download one" Classes="section" />
+        <TextBlock Classes="muted"
+                   Text="Enter the title id and title key of a base you are entitled to use. Downloads use your common key from Settings." />
+        <TextBlock Classes="error" Text="Add your Wii U common key in Settings first."
+                   IsVisible="{Binding !Inject.HasCommonKey}" />
+        <TextBlock Text="Title id (16 hex characters)" Classes="label" />
+        <TextBox Text="{Binding Inject.TitleId}" PlaceholderText="0005000010..." MaxLength="16"
+                 FontFamily="Menlo,Monaco,monospace" AutomationProperties.Name="Title id" />
+        <TextBlock Text="Title key (32 hex characters)" Classes="label" />
+        <TextBox Text="{Binding Inject.TitleKey}" PasswordChar="•" MaxLength="32"
+                 FontFamily="Menlo,Monaco,monospace" AutomationProperties.Name="Title key" />
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <Button Content="Download base" Command="{Binding Inject.DownloadBaseCommand}" />
+          <Button Content="Cancel" Command="{Binding Inject.CancelCommand}" IsVisible="{Binding Inject.IsDownloading}" />
+        </StackPanel>
+        <StackPanel Spacing="4" IsVisible="{Binding Inject.IsDownloading}">
+          <ProgressBar Value="{Binding Inject.Percent}" Maximum="100" AutomationProperties.Name="Download progress" />
+          <TextBlock Text="{Binding Inject.ProgressMessage}" Classes="muted" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+    </StackPanel>
+  </StackPanel>
+</UserControl>

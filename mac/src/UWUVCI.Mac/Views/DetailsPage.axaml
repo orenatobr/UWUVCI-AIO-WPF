@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:UWUVCI.Mac.ViewModels"
+             xmlns:v="using:UWUVCI.Mac.Views"
+             x:Class="UWUVCI.Mac.Views.DetailsPage"
+             x:DataType="vm:MainViewModel">
+  <StackPanel Spacing="24">
+    <StackPanel Spacing="4">
+      <TextBlock Text="Name and images" Classes="title" />
+      <TextBlock Classes="muted" Text="What the game is called in the Wii U menu. The images are optional." />
+    </StackPanel>
+
+    <Border Classes="card">
+      <StackPanel Spacing="8">
+        <TextBlock Text="Game name" Classes="label" />
+        <TextBox Text="{Binding Inject.GameName}" PlaceholderText="Banjo|Tooie" AutomationProperties.Name="Game name" />
+        <TextBlock Classes="muted" Text="Use | to start a second line, for example Banjo|Tooie." />
+        <TextBlock Text="{Binding Inject.GameNameError}" Classes="error"
+                   IsVisible="{Binding Inject.GameNameError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      </StackPanel>
+    </Border>
+
+    <ItemsControl ItemsSource="{Binding Inject.ImageSlots}" AutomationProperties.Name="Images">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <UniformGrid Columns="2" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:ImageSlot">
+          <Border Classes="card" Margin="0,0,12,12" Padding="16">
+            <Grid ColumnDefinitions="96,*" ColumnSpacing="16">
+              <Border Width="96" Height="96" CornerRadius="8" ClipToBounds="True"
+                      Background="{DynamicResource CodeBg}" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                <Image Source="{Binding Path, Converter={x:Static v:Converters.PathToBitmap}}" Stretch="Uniform"
+                       AutomationProperties.Name="{Binding Label, StringFormat='{}{0} preview'}" />
+              </Border>
+              <StackPanel Grid.Column="1" Spacing="6">
+                <TextBlock Text="{Binding Label}" Classes="section" />
+                <TextBlock Text="{Binding Hint}" Classes="muted" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Button Content="Choose..." Click="OnChoose" AutomationProperties.Name="{Binding Label, StringFormat='Choose {0}'}" />
+                  <Button Content="Remove" Command="{Binding ClearCommand}" IsVisible="{Binding HasImage}"
+                          AutomationProperties.Name="{Binding Label, StringFormat='Remove {0}'}" />
+                </StackPanel>
+                <TextBlock Text="{Binding Error}" Classes="error"
+                           IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+              </StackPanel>
+            </Grid>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

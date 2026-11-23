@@ -35,9 +35,21 @@ Real hardware was not used.
 
 ## Choices in the VC profile that are guesses
 
-* `RamSize = 0x800000` (Expansion Pak) is enabled for Conker, Jet Force Gemini, Turok 2 and Turok 3.
-  No published ini sets this key and its effect on the VC emulator is unverified. It is a switch in the
-  UI (Auto, On, Off) so it can be turned off.
+* `RamSize = 0x800000` (Expansion Pak) is **off by default for every game**. No published ini sets this key
+  and its effect on the VC emulator is unverified. The Options step has an Auto, On, Off switch so it can
+  be tried on games that fail without it, such as Conker and Jet Force Gemini.
 * The GoldenEye break block hack is copied from a Japanese ini and only applied to Japanese ROMs.
 * Turok, Turok 2, Turok 3 and Rage Wars have no community ini. They get the save type and controller pak
   setting from the checksum database and nothing else.
+
+## What blocks "fully compatible"
+
+These need something only the owner can provide:
+
+* **GoldenEye 007 and the Turok games:** a legally owned ROM of each, to run them in Cemu and write or fix
+  their ini. Without it nothing here is known to work for them.
+* **The official Virtual Console engine:** an official N64 base title and its title key, to test the ini
+  profiles and the Expansion Pak switch for real.
+* **Speed and scenery on the native engine:** Banjo-Tooie runs at about 10 FPS with missing scenery. That is
+  emulator work in not64-wiiu, not in this app.
+* **Real hardware:** every run so far is in Cemu.

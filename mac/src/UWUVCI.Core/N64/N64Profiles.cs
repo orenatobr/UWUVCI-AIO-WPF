@@ -9,11 +9,6 @@ namespace UWUVCI.Core.N64;
 /// </summary>
 public static class N64Profiles
 {
-    // Titles that need the Expansion Pak on a real console and are rated "Doesn't work" in the
-    // UWUVCI list. No published ini sets RamSize, so this is an experiment, switchable per inject.
-    private static readonly string[] ExperimentalPak =
-        ["Conker's Bad Fur Day", "Jet Force Gemini", "Turok 2", "Turok 3"];
-
     private const string BanjoInput = "[Input]\nStickModify = 2\n";
 
     private const string GoldenEyeJp =
@@ -45,8 +40,8 @@ public static class N64Profiles
         }
 
         o = Tune(name, o);
-        bool pak = pakOverride ?? ExperimentalPak.Any(t => name.StartsWith(t, StringComparison.OrdinalIgnoreCase));
-        return o with { ExpansionPak = pak };
+        // No published ini sets RamSize, so the Expansion Pak stays off unless the user asks for it.
+        return o with { ExpansionPak = pakOverride ?? false };
     }
 
     private static VcIniOptions Tune(string name, VcIniOptions o)

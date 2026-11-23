@@ -48,7 +48,7 @@
       <StackPanel Spacing="8">
         <TextBlock Text="Expansion Pak (experimental)" Classes="section" />
         <TextBlock Classes="muted"
-                   Text="Auto follows the game profile. On adds the 4 MB Expansion Pak to the ini, off removes it. No published ini sets it, so results for games that need it are not guaranteed." />
+                   Text="Auto and Off leave it out, which is what every published ini does. On adds the 4 MB Expansion Pak to the ini. Nobody has confirmed that this helps, so try it only for games that fail without it." />
         <ListBox ItemsSource="{Binding Inject.PakChoices}" SelectedItem="{Binding Inject.PakChoice}"
                  AutomationProperties.Name="Expansion Pak choice">
           <ListBox.ItemsPanel>

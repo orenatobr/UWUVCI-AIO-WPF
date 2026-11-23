@@ -342,3 +342,4 @@ healthchecksdb
 mac/**/bin/
 mac/**/obj/
 .DS_Store
+mac/dist/

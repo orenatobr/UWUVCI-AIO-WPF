@@ -5,12 +5,26 @@ namespace UWUVCI.Core.Tests.Injection;
 
 public class MetaXmlTests
 {
+    private static string AppPath(TestBase b) => Path.Combine(b.Root.FullName, "code", "app.xml");
+
+    [Fact]
+    public void Apply_KeepsAppXmlIdsInSyncWithMetaXml()
+    {
+        using var b = new TestBase();
+        var meta = Path.Combine(b.Root.FullName, "meta", "meta.xml");
+        MetaXml.Apply(meta, AppPath(b), "Game", new Random(5));
+        var m = XDocument.Load(meta).Root!;
+        var a = XDocument.Load(AppPath(b)).Root!;
+        Assert.Equal(m.Element("title_id")!.Value, a.Element("title_id")!.Value);
+        Assert.Equal(m.Element("group_id")!.Value, a.Element("group_id")!.Value);
+    }
+
     [Fact]
     public void Apply_SetsNamesAndIds_Deterministically()
     {
         using var b = new TestBase();
         var path = Path.Combine(b.Root.FullName, "meta", "meta.xml");
-        MetaXml.Apply(path, "Banjo-Tooie|N64", new Random(42));
+        MetaXml.Apply(path, AppPath(b), "Banjo-Tooie|N64", new Random(42));
 
         var d = XDocument.Load(path).Root!;
         Assert.Equal("Banjo-Tooie\nN64", d.Element("longname_en")!.Value);
@@ -21,7 +35,7 @@ public class MetaXmlTests
 
         var again = Path.Combine(b.Root.FullName, "meta", "meta2.xml");
         File.WriteAllText(again, TestBase.MetaXml);
-        MetaXml.Apply(again, "Banjo-Tooie|N64", new Random(42));
+        MetaXml.Apply(again, AppPath(b), "Banjo-Tooie|N64", new Random(42));
         Assert.Equal(d.Element("title_id")!.Value, XDocument.Load(again).Root!.Element("title_id")!.Value);
     }
 
@@ -30,11 +44,11 @@ public class MetaXmlTests
     {
         using var b = new TestBase();
         var path = Path.Combine(b.Root.FullName, "meta", "meta.xml");
-        MetaXml.Apply(path, "", new Random(1));
+        MetaXml.Apply(path, AppPath(b), "", new Random(1));
         Assert.Equal("Old", XDocument.Load(path).Root!.Element("longname_en")!.Value);
     }
 
     [Fact]
     public void Apply_MissingFile_Throws() =>
-        Assert.Throws<FileNotFoundException>(() => MetaXml.Apply("/nonexistent/meta.xml", "x", new Random(1)));
+        Assert.Throws<FileNotFoundException>(() => MetaXml.Apply("/nonexistent/meta.xml", "/nonexistent/app.xml", "x", new Random(1)));
 }

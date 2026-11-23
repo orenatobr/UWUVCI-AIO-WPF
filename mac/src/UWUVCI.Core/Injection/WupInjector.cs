@@ -36,7 +36,8 @@ public static class WupInjector
         N64Injector.Inject(work, req.RomPath, req.N64);
 
         progress?.Report(new InjectProgress(60, "Editing meta.xml..."));
-        MetaXml.Apply(Path.Combine(work, "meta", "meta.xml"), req.GameName, rng ?? Random.Shared);
+        MetaXml.Apply(Path.Combine(work, "meta", "meta.xml"), Path.Combine(work, "code", "app.xml"),
+            req.GameName, rng ?? Random.Shared);
 
         progress?.Report(new InjectProgress(70, "Converting images..."));
         WriteImages(req, Path.Combine(work, "meta"));

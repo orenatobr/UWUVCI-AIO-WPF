@@ -22,11 +22,15 @@ Both engines are selectable in the app on the Options step. The native choice in
 Titles were built by `uwuvci-cli native-layout` from the real ROMs and started in Cemu 2.6 on an Apple
 M series Mac. Only the first minutes were watched. Nobody played through a level.
 
+The FPS figures below are the counter in the Cemu window title, which is how fast the host presents frames.
+They are not the game's own speed. The not64 accuracy log (`docs/ACCURACY.md` in not64-wiiu) measures speed in
+VI per second and recorded Banjo-Tooie at 50 in game. The two numbers were not compared in this work.
+
 | Game | Result in Cemu (native engine) |
 |---|---|
 | Conker's Bad Fur Day (EU) | Boots to the "For mature audiences only" screen, about 25 FPS |
 | Jet Force Gemini (US) | Boots to the title screen, about 25 FPS |
-| Banjo-Tooie (EU) | Runs the intro, about 10 FPS, part of the scenery is missing |
+| Banjo-Tooie (EU) | Runs the intro. Window counter about 10 FPS and the one frame captured showed a mostly dark scene with only some geometry visible. Not investigated further |
 | GoldenEye 007 | Not tested, no ROM available |
 | Turok, Turok 2, Turok 3, Rage Wars | Not tested, no ROM available |
 
@@ -50,6 +54,7 @@ These need something only the owner can provide:
   their ini. Without it nothing here is known to work for them.
 * **The official Virtual Console engine:** an official N64 base title and its title key, to test the ini
   profiles and the Expansion Pak switch for real.
-* **Speed and scenery on the native engine:** Banjo-Tooie runs at about 10 FPS with missing scenery. That is
-  emulator work in not64-wiiu, not in this app.
+* **Speed and scenery on the native engine:** one Banjo-Tooie frame looked incomplete and the window counter
+  read about 10 FPS. Whether that is a real rendering problem or a dark intro scene was not established. Any
+  fix would be emulator work in not64-wiiu, not in this app.
 * **Real hardware:** every run so far is in Cemu.

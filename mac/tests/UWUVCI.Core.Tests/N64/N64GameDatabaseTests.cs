@@ -23,16 +23,4 @@ public class N64GameDatabaseTests
 
     [Fact]
     public void Count_IsPlausible() => Assert.InRange(N64GameDatabase.Count, 1000, 5000);
-
-    [Theory]
-    [InlineData("Banjo-Tooie (U) [!]", true)]
-    [InlineData("Conker's Bad Fur Day (U) [!]", true)]
-    [InlineData("Jet Force Gemini (E) (M4) [!]", true)]
-    [InlineData("Turok 2 - Seeds of Evil (U) (V1.0) [!]", true)]
-    [InlineData("Turok 3 - Shadow of Oblivion (U) [!]", true)]
-    [InlineData("GoldenEye 007 (U) [!]", false)]
-    [InlineData("Turok - Dinosaur Hunter (U) (V1.0) [!]", false)]
-    [InlineData("Super Mario 64 (U) [!]", false)]
-    public void NeedsExpansionPak(string name, bool expected) =>
-        Assert.Equal(expected, N64GameDatabase.NeedsExpansionPak(name));
 }

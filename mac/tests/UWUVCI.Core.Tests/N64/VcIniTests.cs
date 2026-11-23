@@ -56,4 +56,19 @@ public class VcIniTests
     [InlineData("a\rb")]
     public void Build_RejectsNewlinesInName(string name) =>
         Assert.Throws<ArgumentException>(() => VcIni.Build(new VcIniOptions(name, "US")));
+
+    [Fact]
+    public void Build_NullBackupSize_OmitsKey()
+    {
+        var ini = VcIni.Build(new VcIniOptions("G", "US") { BackupType = BackupType.Flash, BackupSize = null });
+        Assert.DoesNotContain("BackupSize", ini);
+        Assert.Contains("BackupType = 2", ini);
+    }
+
+    [Fact]
+    public void Build_AppendsExtraSectionsAfterBlankLine()
+    {
+        var ini = VcIni.Build(new VcIniOptions("G", "US") { ExtraSections = "[Input]\r\nStickModify = 2" });
+        Assert.EndsWith("\n\n[Input]\nStickModify = 2\n", ini);
+    }
 }

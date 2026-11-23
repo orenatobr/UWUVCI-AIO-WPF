@@ -30,14 +30,6 @@ public sealed record N64Game(uint Crc1, uint Crc2, string Name, SaveKind Save, i
 /// <summary>Lookup of ROM metadata by header CRC, generated from the mupen64plus game database.</summary>
 public static class N64GameDatabase
 {
-    // Titles whose engine uses the 4 MB Expansion Pak (8 MB RDRAM) and fail or corrupt without it.
-    private static readonly string[] ExpansionPakTitles =
-    [
-        "Banjo-Tooie", "Conker's Bad Fur Day", "Jet Force Gemini",
-        "Turok 2", "Turok 3", "Perfect Dark", "Donkey Kong 64",
-        "Zelda no Densetsu - Mujura no Kamen", "Legend of Zelda, The - Majora's Mask",
-    ];
-
     private static readonly Lazy<Dictionary<(uint, uint), N64Game>> Table = new(Load);
 
     /// <summary>Number of catalogued games.</summary>
@@ -46,10 +38,6 @@ public static class N64GameDatabase
     /// <summary>Finds a game by its ROM header checksums, or null.</summary>
     public static N64Game? Find(uint crc1, uint crc2) =>
         Table.Value.TryGetValue((crc1, crc2), out var g) ? g : null;
-
-    /// <summary>True for titles that need the Expansion Pak to run correctly.</summary>
-    public static bool NeedsExpansionPak(string name) =>
-        ExpansionPakTitles.Any(t => name.StartsWith(t, StringComparison.OrdinalIgnoreCase));
 
     private static SaveKind ParseSave(string s) => s switch
     {

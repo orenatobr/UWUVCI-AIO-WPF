@@ -4,10 +4,23 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="UWUVCI.Core.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="N64\Data\n64-games.tsv" LogicalName="n64-games.tsv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CDecryptSharp" Version="1.0.4" />
+    <PackageReference Include="CNUSPACKER" Version="1.0.5" />
+    <PackageReference Include="SkiaSharp" Version="3.119.0" />
+    <PackageReference Include="WiiUDownloaderLibrary" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

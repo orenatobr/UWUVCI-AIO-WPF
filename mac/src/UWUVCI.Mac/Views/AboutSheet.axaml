@@ -17,6 +17,10 @@
             <TextBlock Classes="muted" Text="It is the only console implemented in the macOS build so far. The other consoles are listed but disabled until their conversion steps are ported." />
           </StackPanel>
           <StackPanel Spacing="4">
+            <TextBlock Text="Which engine should I pick?" Classes="label" />
+            <TextBlock Classes="muted" TextWrapping="Wrap" Text="Nintendo Virtual Console puts your ROM into an official N64 title that you supply, so it needs a base and its title key. Native packs the not64 emulator instead and keeps the ROM on your SD card. It needs no base and can start games the Virtual Console engine cannot, but it is experimental and slower than full speed." />
+          </StackPanel>
+          <StackPanel Spacing="4">
             <TextBlock Text="Where do I get a base?" Classes="label" />
             <TextBlock Classes="muted" Text="Use a base you are entitled to. Either point to a decrypted folder (code, content, meta) or enter its title id and title key to download and decrypt it with your common key." />
           </StackPanel>

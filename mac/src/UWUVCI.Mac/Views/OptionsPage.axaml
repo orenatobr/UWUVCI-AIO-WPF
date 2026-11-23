@@ -10,6 +10,32 @@
     </StackPanel>
 
     <Border Classes="card">
+      <StackPanel Spacing="12">
+        <TextBlock Text="Engine" Classes="section" />
+        <RadioButton GroupName="Engine" IsChecked="{Binding Inject.IsNintendoVc}" AutomationProperties.Name="Nintendo Virtual Console engine">
+          <StackPanel Spacing="2">
+            <TextBlock Text="Nintendo Virtual Console" FontWeight="SemiBold" />
+            <TextBlock Classes="muted" TextWrapping="Wrap" MaxWidth="560"
+                       Text="Uses the official N64 emulator from a base title you supply." />
+          </StackPanel>
+        </RadioButton>
+        <RadioButton GroupName="Engine" IsChecked="{Binding Inject.IsNative}" AutomationProperties.Name="Native engine">
+          <StackPanel Spacing="2">
+            <TextBlock Text="Native (not64)" FontWeight="SemiBold" />
+            <TextBlock Classes="muted" TextWrapping="Wrap" MaxWidth="560"
+                       Text="Runs the not64 emulator. No Nintendo base or title key needed. Works for games the Virtual Console engine cannot run. Experimental: slower than full speed. The ROM is copied to your SD card, not packed into the title." />
+          </StackPanel>
+        </RadioButton>
+      </StackPanel>
+    </Border>
+
+    <Border Classes="card" IsVisible="{Binding Inject.IsNative}">
+      <TextBlock Classes="muted" TextWrapping="Wrap"
+                 Text="Widescreen, the dark filter, the Expansion Pak and a custom ini only apply to the Virtual Console engine, so they are hidden. The game name and images still apply." />
+    </Border>
+
+    <StackPanel Spacing="24" IsVisible="{Binding Inject.ShowVcOptions}">
+    <Border Classes="card">
       <StackPanel Spacing="16">
         <ToggleSwitch IsChecked="{Binding Inject.WideScreen}" OnContent="Widescreen (16:9)" OffContent="Widescreen (16:9)"
                       AutomationProperties.Name="Widescreen" />
@@ -53,5 +79,6 @@
                    IsVisible="{Binding Inject.CustomIniError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
       </StackPanel>
     </Border>
+    </StackPanel>
   </StackPanel>
 </UserControl>

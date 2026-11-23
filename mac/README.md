@@ -11,6 +11,8 @@ Only Nintendo 64 works today. The other consoles are listed in the picker but di
 
 The flow is a single window with a step list: console, ROM, base, name and images, N64 options, output. You can drop a ROM or choose one, and a card shows what was detected (game, region, save type, controller accessory, Expansion Pak) with a read only preview of the ini that will be written. The base is either a decrypted folder (it must contain `code`, `content`, `meta`) or a download from a title id and title key. The Wii U common key is set once in Settings.
 
+The Options step also picks the engine. Nintendo Virtual Console (default) injects into a base title you supply. Native runs the not64 emulator: no base or title key is needed, the Base step is skipped, widescreen, dark filter, Expansion Pak and custom ini are hidden, and the finished screen shows two folders, the packed title and an SD folder to copy to the root of the SD card. The native path downloads the emulator template from the not64-wiiu GitHub release when you press Inject.
+
 Settings are stored in `~/Library/Application Support/UWUVCI/settings.json` with file mode 600. The log is `~/Library/Logs/UWUVCI/uwuvci.log`. Keys are never written to the log.
 
 ## Build, run, test
@@ -35,6 +37,7 @@ Set `UWUVCI_SCREENSHOT_DIR` before `dotnet test` to keep the PNGs rendered by th
 
 - A full inject against a real base and a real ROM was not run from the UI. Core has its own tests with synthetic data.
 - Downloading a base from the Nintendo CDN was not run.
+- The native engine from the UI (template download, pack, SD folder) was not run end to end. The view model and service wiring are covered with a fake service, and the Core native path is covered by its own tests. `InjectService.InjectNativeAsync` has no automated test.
 - Drag and drop and the native file panels were not exercised by hand or by automation.
 - VoiceOver was not tried. Controls have automation names and keyboard focus styles, but that is not a substitute for testing.
 - Cancel takes effect at the next step boundary of the injector, not instantly.

@@ -34,6 +34,21 @@ internal sealed class FakeInjectService : IInjectService
         return Path.Combine(outputRoot, "[WUP][N64] Result");
     }
 
+    public InjectRequest? NativeRequest { get; private set; }
+
+    public async Task<NativeLayout> InjectNativeAsync(InjectRequest request, string outputRoot, string commonKey,
+        IProgress<InjectProgress> progress, CancellationToken ct)
+    {
+        NativeRequest = request;
+        OutputRoot = outputRoot;
+        CommonKeyUsed = commonKey;
+        progress.Report(new InjectProgress(40, "Downloading native emulator..."));
+        if (Gate is not null) await Gate.Task.WaitAsync(ct);
+        if (Fail is not null) throw Fail;
+        return new NativeLayout(Path.Combine(outputRoot, "[WUP][N64] Result Native"),
+            Path.Combine(outputRoot, "[WUP][N64] Result Native SD"));
+    }
+
     public Task DownloadBaseAsync(string titleId, string titleKey, string commonKey, string destDir,
         IProgress<InjectProgress> progress, CancellationToken ct)
     {
@@ -73,6 +88,15 @@ internal sealed class Fixture : IDisposable
     {
         Vm.SetRom(Dir.File("game.z64", TestData.BanjoTooie()));
         Vm.SetBase(Dir.Base());
+        Vm.GameName = "Banjo|Tooie";
+        Vm.SetOutput(Path.Combine(Dir.Path, "out"));
+    }
+
+    /// <summary>Native engine with everything valid except the base.</summary>
+    public void MakeValidNative()
+    {
+        Vm.Engine = InjectEngine.Native;
+        Vm.SetRom(Dir.File("game.z64", TestData.BanjoTooie()));
         Vm.GameName = "Banjo|Tooie";
         Vm.SetOutput(Path.Combine(Dir.Path, "out"));
     }

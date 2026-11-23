@@ -10,6 +10,12 @@
                  Text="The base is the Wii U game your ROM is injected into. You supply it. The app ships none." />
     </StackPanel>
 
+    <Border Classes="card" IsVisible="{Binding Inject.IsNative}">
+      <TextBlock Classes="muted" TextWrapping="Wrap"
+                 Text="Not needed. The native engine does not use a Nintendo base." />
+    </Border>
+
+    <StackPanel Spacing="24" IsVisible="{Binding Inject.IsBaseRequired}">
     <Border Classes="card">
       <StackPanel Spacing="12">
         <TextBlock Text="Use a decrypted base folder" Classes="section" />
@@ -49,5 +55,6 @@
         </StackPanel>
       </StackPanel>
     </Border>
+    </StackPanel>
   </StackPanel>
 </UserControl>

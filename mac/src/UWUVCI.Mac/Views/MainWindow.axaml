@@ -49,8 +49,12 @@
                             IsVisible="{Binding IsComplete}" />
                     </Panel>
                   </Border>
-                  <TextBlock Grid.Column="1" Text="{Binding Title}" Margin="8,0,0,0" VerticalAlignment="Center"
-                             FontWeight="{Binding IsCurrent, Converter={x:Static v:Converters.BoldIf}}" />
+                  <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Title}"
+                               FontWeight="{Binding IsCurrent, Converter={x:Static v:Converters.BoldIf}}" />
+                    <TextBlock Text="{Binding Note}" Classes="muted" FontSize="11"
+                               IsVisible="{Binding Note, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                  </StackPanel>
                 </Grid>
               </Button>
             </DataTemplate>

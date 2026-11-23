@@ -29,8 +29,12 @@
           <TextBlock Grid.Column="1" Text="{Binding Inject.RomName}" TextWrapping="Wrap" />
           <TextBlock Grid.Row="1" Text="Game name" Classes="muted" />
           <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Inject.GameName}" TextWrapping="Wrap" />
-          <TextBlock Grid.Row="2" Text="Base" Classes="muted" />
-          <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Inject.BaseDir}" TextTrimming="CharacterEllipsis" />
+          <TextBlock Grid.Row="2" Text="Base" Classes="muted" IsVisible="{Binding Inject.IsBaseRequired}" />
+          <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Inject.BaseDir}" TextTrimming="CharacterEllipsis"
+                     IsVisible="{Binding Inject.IsBaseRequired}" />
+          <TextBlock Grid.Row="2" Text="Engine" Classes="muted" IsVisible="{Binding Inject.IsNative}" />
+          <TextBlock Grid.Row="2" Grid.Column="1" Text="Native (not64), downloads the emulator when you inject"
+                     IsVisible="{Binding Inject.IsNative}" />
         </Grid>
         <StackPanel Spacing="8" IsVisible="{Binding !Inject.HasCommonKey}">
           <TextBlock Classes="error" Text="Packing needs your Wii U common key." />

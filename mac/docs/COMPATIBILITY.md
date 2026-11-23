@@ -15,6 +15,8 @@ project does not ship and the author did not have.
 (`sd:/not64/roms` and `sd:/not64/autoboot.txt`). It does not depend on the VC emulator, so it does not
 inherit its limits. It needs only the Wii U common key to encrypt the title.
 
+Both engines are selectable in the app on the Options step. The native choice in the UI was only checked with a fake service and headless renders. The results table below comes from `uwuvci-cli native-layout`, not from the UI.
+
 ## What was run
 
 Titles were built by `uwuvci-cli native-layout` from the real ROMs and started in Cemu 2.6 on an Apple

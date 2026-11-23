@@ -42,6 +42,10 @@ public sealed partial class StepItem(WizardStep step, string title) : Observable
     [ObservableProperty]
     private bool _isComplete;
 
+    /// <summary>Short note shown under the title, for example "Not needed". Empty when none.</summary>
+    [ObservableProperty]
+    private string _note = "";
+
     /// <summary>True when every earlier page is complete, so the user may jump here.</summary>
     [ObservableProperty]
     private bool _isEnabled;
@@ -122,7 +126,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         WizardStep.Console => SelectedConsole is null ? "Choose Nintendo 64 to continue." : "",
         WizardStep.Rom => Inject.IsRomValid ? "" : "Choose an N64 ROM to continue.",
-        WizardStep.Base => Inject.IsBaseValid ? "" : "Choose or download a decrypted base to continue.",
+        WizardStep.Base => Inject.IsBaseSatisfied ? "" : "Choose or download a decrypted base to continue.",
         WizardStep.Details => Inject.IsDetailsValid ? "" : "Enter a game name (and fix any image error) to continue.",
         WizardStep.Options => Inject.IsOptionsValid ? "" : "Fix the custom ini to continue.",
         _ => !Inject.HasCommonKey ? "Add your Wii U common key in Settings to inject."
@@ -140,15 +144,18 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanGoNext))]
     private void Next()
     {
-        if (CanGoNext) Step++;
+        if (CanGoNext) Step = Skip(Step + 1, 1);
     }
 
     /// <summary>Moves to the previous page.</summary>
     [RelayCommand(CanExecute = nameof(CanGoBack))]
     private void Back()
     {
-        if (CanGoBack) Step--;
+        if (CanGoBack) Step = Skip(Step - 1, -1);
     }
+
+    /// <summary>Steps over the Base page when the native engine does not need it.</summary>
+    private WizardStep Skip(WizardStep s, int dir) => s == WizardStep.Base && Inject.IsNative ? s + dir : s;
 
     private bool CanGoBack => !IsFirstStep;
 
@@ -190,6 +197,18 @@ public sealed partial class MainViewModel : ObservableObject
         if (Inject.ResultPath is { } p) RevealAction(p);
     }
 
+    /// <summary>Reveals the SD card files folder of a native inject in Finder.</summary>
+    [RelayCommand]
+    private void ShowSdInFinder()
+    {
+        if (Inject.ResultSdPath is { } p) RevealAction(p);
+    }
+
+    /// <summary>What to do with the SD folder of a native inject.</summary>
+    public string SdInstruction =>
+        "Copy the contents of the SD folder to the root of your SD card (it holds not64/roms and not64/autoboot.txt). "
+        + "autoboot.txt starts this game on launch, so keep one game per SD card.";
+
     /// <summary>Starts a new job on the ROM page.</summary>
     [RelayCommand]
     private void InjectAnother()
@@ -210,7 +229,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         WizardStep.Console => SelectedConsole is not null,
         WizardStep.Rom => Inject.IsRomValid,
-        WizardStep.Base => Inject.IsBaseValid,
+        WizardStep.Base => Inject.IsBaseSatisfied,
         WizardStep.Details => Inject.IsDetailsValid,
         WizardStep.Options => Inject.IsOptionsValid,
         WizardStep.Output => Inject.CanInject,
@@ -223,6 +242,7 @@ public sealed partial class MainViewModel : ObservableObject
         foreach (var item in Steps)
         {
             item.IsCurrent = item.Step == Step;
+            item.Note = item.Step == WizardStep.Base && Inject.IsNative ? "Not needed" : "";
             bool complete = IsComplete(item.Step);
             item.IsComplete = earlierDone && complete;
             item.IsEnabled = earlierDone;

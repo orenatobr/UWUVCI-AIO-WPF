@@ -307,4 +307,105 @@ public class InjectViewModelTests
         Assert.True(f.Vm.IsOutputValid);
         Assert.Null(f.Vm.ResultPath);
     }
+
+    [Fact]
+    public void Engine_DefaultsToNintendoVc_AndNeedsBase()
+    {
+        using var f = new Fixture();
+        Assert.Equal(InjectEngine.NintendoVc, f.Vm.Engine);
+        Assert.True(f.Vm.ShowVcOptions);
+        f.MakeValid();
+        f.Vm.SetBase(null);
+        Assert.False(f.Vm.CanInject);
+    }
+
+    [Fact]
+    public void Native_CanInjectWithoutBase()
+    {
+        using var f = new Fixture();
+        f.MakeValidNative();
+        Assert.True(f.Vm.IsNative);
+        Assert.False(f.Vm.IsBaseRequired);
+        Assert.False(f.Vm.ShowVcOptions);
+        Assert.True(f.Vm.CanInject);
+    }
+
+    [Fact]
+    public void Native_IgnoresBadCustomIni()
+    {
+        using var f = new Fixture();
+        f.MakeValidNative();
+        f.Vm.SetCustomIni(f.Dir.File("bad.bin", new byte[] { 0, 1, 2 }));
+        Assert.True(f.Vm.IsOptionsValid);
+        f.Vm.Engine = InjectEngine.NintendoVc;
+        Assert.False(f.Vm.IsOptionsValid);
+    }
+
+    [Fact]
+    public void EngineRadioProxies_SwitchEngine()
+    {
+        using var f = new Fixture();
+        f.Vm.IsNative = true;
+        Assert.Equal(InjectEngine.Native, f.Vm.Engine);
+        Assert.False(f.Vm.IsNintendoVc);
+        f.Vm.IsNintendoVc = true;
+        Assert.Equal(InjectEngine.NintendoVc, f.Vm.Engine);
+        f.Vm.IsNative = false;
+        Assert.True(f.Vm.IsNintendoVc);
+    }
+
+    [Fact]
+    public async Task Native_Inject_CallsNativeService_WithDefaultN64Options()
+    {
+        using var f = new Fixture();
+        f.MakeValidNative();
+        f.Vm.WideScreen = true;
+        f.Vm.DarkFilter = true;
+        f.Vm.PakChoice = PakChoice.On;
+        await f.Vm.InjectCommand.ExecuteAsync(null);
+        Assert.Null(f.Service.Request);
+        Assert.NotNull(f.Service.NativeRequest);
+        Assert.False(f.Service.NativeRequest!.N64.WideScreen);
+        Assert.False(f.Service.NativeRequest.N64.DarkFilter);
+        Assert.Null(f.Service.NativeRequest.N64.ExpansionPak);
+        Assert.Equal(InjectPhase.Done, f.Vm.Phase);
+        Assert.EndsWith("Result Native", f.Vm.ResultPath);
+        Assert.EndsWith("Result Native SD", f.Vm.ResultSdPath);
+        Assert.True(f.Vm.HasSdResult);
+    }
+
+    [Fact]
+    public async Task Vc_Inject_HasNoSdResult()
+    {
+        using var f = new Fixture();
+        f.MakeValid();
+        await f.Vm.InjectCommand.ExecuteAsync(null);
+        Assert.NotNull(f.Service.Request);
+        Assert.Null(f.Service.NativeRequest);
+        Assert.Null(f.Vm.ResultSdPath);
+        Assert.False(f.Vm.HasSdResult);
+    }
+
+    [Fact]
+    public async Task Native_Failure_ReturnsToEditing()
+    {
+        using var f = new Fixture();
+        f.MakeValidNative();
+        f.Service.Fail = new InvalidDataException("template broke");
+        await f.Vm.InjectCommand.ExecuteAsync(null);
+        Assert.Equal(InjectPhase.Editing, f.Vm.Phase);
+        Assert.Equal("template broke", f.Vm.ErrorMessage);
+        Assert.Null(f.Vm.ResultSdPath);
+    }
+
+    [Fact]
+    public async Task Reset_ClearsSdResult_KeepsEngine()
+    {
+        using var f = new Fixture();
+        f.MakeValidNative();
+        await f.Vm.InjectCommand.ExecuteAsync(null);
+        f.Vm.Reset();
+        Assert.Null(f.Vm.ResultSdPath);
+        Assert.Equal(InjectEngine.Native, f.Vm.Engine);
+    }
 }

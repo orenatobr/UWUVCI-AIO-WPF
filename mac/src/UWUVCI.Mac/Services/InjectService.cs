@@ -10,6 +10,13 @@ public interface IInjectService
     Task<string> InjectAsync(InjectRequest request, string outputRoot, string commonKey,
         IProgress<InjectProgress> progress, CancellationToken ct);
 
+    /// <summary>
+    /// Runs a native engine inject: fetches the not64 template, packs the title and writes the SD files.
+    /// </summary>
+    /// <exception cref="OperationCanceledException">Cancelled; takes effect at the next step boundary.</exception>
+    Task<NativeLayout> InjectNativeAsync(InjectRequest request, string outputRoot, string commonKey,
+        IProgress<InjectProgress> progress, CancellationToken ct);
+
     /// <summary>Downloads and decrypts a base into <paramref name="destDir"/>.</summary>
     Task DownloadBaseAsync(string titleId, string titleKey, string commonKey, string destDir,
         IProgress<InjectProgress> progress, CancellationToken ct);
@@ -27,6 +34,27 @@ public sealed class InjectService : IInjectService
             Directory.CreateDirectory(outputRoot);
             return WupInjector.Run(request, outputRoot, commonKey, new CancelCheck(progress, ct));
         }, ct);
+
+    /// <inheritdoc />
+    public async Task<NativeLayout> InjectNativeAsync(InjectRequest request, string outputRoot, string commonKey,
+        IProgress<InjectProgress> progress, CancellationToken ct)
+    {
+        var check = new CancelCheck(progress, ct);
+        ct.ThrowIfCancellationRequested();
+        Directory.CreateDirectory(outputRoot);
+        var temp = Directory.CreateTempSubdirectory("uwuvci-template-");
+        try
+        {
+            progress.Report(new InjectProgress(2, "Downloading native emulator..."));
+            var template = await Not64Template.FetchLatestAsync(temp.FullName, null, ct).ConfigureAwait(false);
+            return await Task.Run(() => WupInjector.RunNative(request, template, outputRoot, commonKey, check), ct)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            temp.Delete(true);
+        }
+    }
 
     /// <inheritdoc />
     public Task DownloadBaseAsync(string titleId, string titleKey, string commonKey, string destDir,

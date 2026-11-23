@@ -31,6 +31,15 @@ public enum PakChoice
     Off,
 }
 
+/// <summary>Which emulator runs the game on the Wii U.</summary>
+public enum InjectEngine
+{
+    /// <summary>The official Virtual Console emulator inside a base title the user supplies.</summary>
+    NintendoVc,
+    /// <summary>The not64 emulator packed as its own title, with the ROM on the SD card.</summary>
+    Native,
+}
+
 /// <summary>Everything the user decides for one N64 inject, plus the run itself.</summary>
 public sealed partial class InjectViewModel : ObservableObject
 {
@@ -151,6 +160,35 @@ public sealed partial class InjectViewModel : ObservableObject
 
     partial void OnPakChoiceChanged(PakChoice value) => Revalidate();
 
+    // ---- Engine ----
+
+    /// <summary>Which engine runs the game.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsNative), nameof(IsNintendoVc), nameof(IsBaseRequired), nameof(ShowVcOptions))]
+    private InjectEngine _engine;
+
+    /// <summary>True for the native (not64) engine. Setting true selects it; false is ignored (radio group).</summary>
+    public bool IsNative
+    {
+        get => Engine == InjectEngine.Native;
+        set { if (value) Engine = InjectEngine.Native; }
+    }
+
+    /// <summary>True for the Nintendo Virtual Console engine. Setting true selects it; false is ignored.</summary>
+    public bool IsNintendoVc
+    {
+        get => Engine == InjectEngine.NintendoVc;
+        set { if (value) Engine = InjectEngine.NintendoVc; }
+    }
+
+    /// <summary>The Virtual Console engine needs a base title, the native one does not.</summary>
+    public bool IsBaseRequired => !IsNative;
+
+    /// <summary>Widescreen, dark filter, Expansion Pak and custom ini only exist in the VC engine.</summary>
+    public bool ShowVcOptions => !IsNative;
+
+    partial void OnEngineChanged(InjectEngine value) => Revalidate();
+
     // ---- Base ----
 
     /// <summary>Canonical path of the decrypted base, or empty.</summary>
@@ -175,6 +213,9 @@ public sealed partial class InjectViewModel : ObservableObject
 
     /// <summary>True when the base folder is usable.</summary>
     public bool IsBaseValid => BaseDir.Length > 0;
+
+    /// <summary>True when the base step is satisfied: a valid base, or none needed.</summary>
+    public bool IsBaseSatisfied => IsNative || IsBaseValid;
 
     partial void OnTitleIdChanged(string value) => DownloadBaseCommand.NotifyCanExecuteChanged();
 
@@ -283,7 +324,7 @@ public sealed partial class InjectViewModel : ObservableObject
     private string? _customIniError;
 
     /// <summary>True when the options are acceptable.</summary>
-    public bool IsOptionsValid => CustomIniError is null;
+    public bool IsOptionsValid => IsNative || CustomIniError is null;
 
     /// <summary>Validates a custom ini (text, up to 16 MiB). Null removes it.</summary>
     public void SetCustomIni(string? path)
@@ -363,6 +404,14 @@ public sealed partial class InjectViewModel : ObservableObject
     [ObservableProperty]
     private string? _resultPath;
 
+    /// <summary>The SD card files folder of a native inject, or null.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSdResult))]
+    private string? _resultSdPath;
+
+    /// <summary>True when the finished job has an SD folder to copy.</summary>
+    public bool HasSdResult => ResultSdPath is not null;
+
     /// <summary>True while injecting.</summary>
     public bool IsRunning => Phase == InjectPhase.Running;
 
@@ -371,7 +420,7 @@ public sealed partial class InjectViewModel : ObservableObject
 
     /// <summary>True when every input is valid and nothing is running.</summary>
     public bool CanInject =>
-        Phase == InjectPhase.Editing && IsRomValid && IsBaseValid && IsDetailsValid && IsOptionsValid
+        Phase == InjectPhase.Editing && IsRomValid && IsBaseSatisfied && IsDetailsValid && IsOptionsValid
         && IsOutputValid && HasCommonKey && !IsDownloading;
 
     partial void OnPhaseChanged(InjectPhase value) => Revalidate();
@@ -390,9 +439,19 @@ public sealed partial class InjectViewModel : ObservableObject
         try
         {
             _log.LogInformation("Inject started: {Game}", GameName);
-            var result = await _service.InjectAsync(BuildRequest(), output, commonKey, NewProgress(), cts.Token)
-                .ConfigureAwait(true);
-            ResultPath = result;
+            if (IsNative)
+            {
+                var layout = await _service.InjectNativeAsync(BuildRequest(), output, commonKey, NewProgress(), cts.Token)
+                    .ConfigureAwait(true);
+                ResultPath = layout.TitleDir;
+                ResultSdPath = layout.SdDir;
+            }
+            else
+            {
+                ResultPath = await _service.InjectAsync(BuildRequest(), output, commonKey, NewProgress(), cts.Token)
+                    .ConfigureAwait(true);
+                ResultSdPath = null;
+            }
             Percent = 100;
             ProgressMessage = "Done";
             Phase = InjectPhase.Done;
@@ -432,6 +491,7 @@ public sealed partial class InjectViewModel : ObservableObject
         PakChoice = PakChoice.Auto;
         SetCustomIni(null);
         ResultPath = null;
+        ResultSdPath = null;
         ErrorMessage = null;
         Percent = 0;
         ProgressMessage = "";
@@ -439,9 +499,10 @@ public sealed partial class InjectViewModel : ObservableObject
         Revalidate();
     }
 
-    private InjectRequest BuildRequest() => new(GameConsole.N64, _detection!.Path, BaseDir, GameName.Trim())
+    private InjectRequest BuildRequest() => new(GameConsole.N64, _detection!.Path, IsNative ? "" : BaseDir, GameName.Trim())
     {
-        N64 = new N64Options
+        // The VC-only options patch the frame layout and ini; the native engine ignores them.
+        N64 = IsNative ? new N64Options() : new N64Options
         {
             CustomIniPath = CustomIniPath,
             ExpansionPak = PakValue,
@@ -488,7 +549,7 @@ public sealed partial class InjectViewModel : ObservableObject
         {
             nameof(Detection), nameof(IsRomValid), nameof(HasRom), nameof(RomFileName), nameof(RomName),
             nameof(RomInDatabase), nameof(RomRegion), nameof(RomSave), nameof(RomControllers),
-            nameof(RomExpansionPak), nameof(IniPreview), nameof(IsBaseValid), nameof(GameNameError),
+            nameof(RomExpansionPak), nameof(IniPreview), nameof(IsBaseValid), nameof(IsBaseSatisfied), nameof(GameNameError),
             nameof(IsDetailsValid), nameof(IsOptionsValid), nameof(OutputError), nameof(IsOutputValid),
             nameof(HasCommonKey), nameof(CanInject),
         })

@@ -12,10 +12,18 @@
         </Border>
         <TextBlock Text="Your game is ready" Classes="title" VerticalAlignment="Center" />
       </StackPanel>
-      <TextBlock Classes="muted" Text="Copy this folder to your Wii U or install it with your usual tool. It is in:" />
+      <TextBlock Classes="muted" TextWrapping="Wrap"
+                 Text="Copy this folder to your Wii U or install it with your usual tool. It is in:" />
       <SelectableTextBlock Text="{Binding Inject.ResultPath}" TextWrapping="Wrap" FontFamily="Menlo,Monaco,monospace" FontSize="12" />
+      <StackPanel Spacing="8" IsVisible="{Binding Inject.HasSdResult}">
+        <TextBlock Text="SD card files" Classes="label" />
+        <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding SdInstruction}" />
+        <SelectableTextBlock Text="{Binding Inject.ResultSdPath}" TextWrapping="Wrap" FontFamily="Menlo,Monaco,monospace" FontSize="12" />
+      </StackPanel>
       <StackPanel Orientation="Horizontal" Spacing="12">
-        <Button Content="Show in Finder" Classes="accent" Command="{Binding ShowInFinderCommand}" />
+        <Button Content="Show title in Finder" Classes="accent" Command="{Binding ShowInFinderCommand}" IsVisible="{Binding Inject.HasSdResult}" />
+        <Button Content="Show SD files in Finder" Command="{Binding ShowSdInFinderCommand}" IsVisible="{Binding Inject.HasSdResult}" />
+        <Button Content="Show in Finder" Classes="accent" Command="{Binding ShowInFinderCommand}" IsVisible="{Binding !Inject.HasSdResult}" />
         <Button Content="Inject another" Command="{Binding InjectAnotherCommand}" />
       </StackPanel>
     </StackPanel>

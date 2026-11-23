@@ -152,4 +152,49 @@ public class MainViewModelTests
         f.Vm.SetOutput(Path.Combine(f.Dir.Path, "o"));
         Assert.Equal("", vm.NextHint);
     }
+
+    [Fact]
+    public void Native_BaseStepIsDoneAndNotNeeded_AndNavigationSkipsIt()
+    {
+        using var f = new Fixture();
+        var vm = Make(f);
+        vm.SelectConsoleCommand.Execute(vm.Consoles.Single(c => c.Available));
+        f.MakeValidNative();
+        var baseItem = vm.Steps.Single(s => s.Step == WizardStep.Base);
+        Assert.True(baseItem.IsComplete);
+        Assert.Equal("Not needed", baseItem.Note);
+                vm.Step = WizardStep.Rom;
+        vm.NextCommand.Execute(null);
+        Assert.Equal(WizardStep.Details, vm.Step);
+        vm.BackCommand.Execute(null);
+        Assert.Equal(WizardStep.Rom, vm.Step);
+        f.Vm.Engine = InjectEngine.NintendoVc;
+        Assert.Equal("", baseItem.Note);
+        Assert.False(baseItem.IsComplete);
+    }
+
+    [Fact]
+    public async Task Native_Done_ShowsBothFolders()
+    {
+        using var f = new Fixture();
+        var revealed = new List<string>();
+        var vm = Make(f, revealed.Add);
+        f.MakeValidNative();
+        await f.Vm.InjectCommand.ExecuteAsync(null);
+        Assert.True(vm.IsDone);
+        Assert.Contains("root of your SD card", vm.SdInstruction);
+        Assert.Contains("one game per SD card", vm.SdInstruction);
+        vm.ShowInFinderCommand.Execute(null);
+        vm.ShowSdInFinderCommand.Execute(null);
+        Assert.Equal([f.Vm.ResultPath!, f.Vm.ResultSdPath!], revealed);
+    }
+
+    [Fact]
+    public void ShowSdInFinder_WithoutResult_DoesNothing()
+    {
+        using var f = new Fixture();
+        var revealed = new List<string>();
+        Make(f, revealed.Add).ShowSdInFinderCommand.Execute(null);
+        Assert.Empty(revealed);
+    }
 }

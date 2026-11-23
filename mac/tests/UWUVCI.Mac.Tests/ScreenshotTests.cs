@@ -107,4 +107,19 @@ public class ScreenshotTests
         f.MakeValid();
         f.Vm.InjectCommand.ExecuteAsync(null).GetAwaiter().GetResult();
     });
+
+    [Fact]
+    public Task OptionsNative_Light() => Render("08-options-native-light", ThemeVariant.Light, (f, vm) =>
+    {
+        SelectN64(vm);
+        f.MakeValidNative();
+        vm.Step = WizardStep.Options;
+    });
+
+    [Fact]
+    public Task DoneNative_Dark() => Render("09-done-native-dark", ThemeVariant.Dark, (f, vm) =>
+    {
+        f.MakeValidNative();
+        f.Vm.InjectCommand.ExecuteAsync(null).GetAwaiter().GetResult();
+    });
 }

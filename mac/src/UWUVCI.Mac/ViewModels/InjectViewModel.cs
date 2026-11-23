@@ -332,10 +332,13 @@ public sealed partial class InjectViewModel : ObservableObject
     public void SetOutput(string? path)
     {
         OutputDir = path ?? "";
-        if (IsOutputValid) _settings.RememberOutputDir(InputGuard.Absolute(OutputDir)!);
     }
 
-    partial void OnOutputDirChanged(string value) => Revalidate();
+    partial void OnOutputDirChanged(string value)
+    {
+        if (IsOutputValid) _settings.RememberOutputDir(InputGuard.Absolute(value)!);
+        Revalidate();
+    }
 
     // ---- Run ----
 
@@ -416,9 +419,6 @@ public sealed partial class InjectViewModel : ObservableObject
     /// <summary>Cancels a running inject or download at the next step boundary.</summary>
     [RelayCommand]
     private void Cancel() => _cts?.Cancel();
-
-    [RelayCommand]
-    private void ToggleIniPreview() => IsIniPreviewOpen = !IsIniPreviewOpen;
 
     /// <summary>Clears the job for "Inject another". The base and output folder stay.</summary>
     public void Reset()

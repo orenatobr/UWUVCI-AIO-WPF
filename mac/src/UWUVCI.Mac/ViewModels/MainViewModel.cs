@@ -88,11 +88,16 @@ public sealed partial class MainViewModel : ObservableObject
 
     /// <summary>True while the Settings sheet is open.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsOverlayOpen))]
     private bool _isSettingsOpen;
 
     /// <summary>True while the About sheet is open.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsOverlayOpen))]
     private bool _isAboutOpen;
+
+    /// <summary>True while a sheet is open; the page behind it is disabled so Tab cannot reach it.</summary>
+    public bool IsOverlayOpen => IsSettingsOpen || IsAboutOpen;
 
     /// <summary>True when the form is showing.</summary>
     public bool IsWizard => Inject.Phase == InjectPhase.Editing;
@@ -111,6 +116,18 @@ public sealed partial class MainViewModel : ObservableObject
 
     /// <summary>True when the open page has what it needs.</summary>
     public bool CanGoNext => !IsLastStep && IsComplete(Step);
+
+    /// <summary>Tells the user what is missing on the open page, empty when nothing is.</summary>
+    public string NextHint => Step switch
+    {
+        WizardStep.Console => SelectedConsole is null ? "Choose Nintendo 64 to continue." : "",
+        WizardStep.Rom => Inject.IsRomValid ? "" : "Choose an N64 ROM to continue.",
+        WizardStep.Base => Inject.IsBaseValid ? "" : "Choose or download a decrypted base to continue.",
+        WizardStep.Details => Inject.IsDetailsValid ? "" : "Enter a game name (and fix any image error) to continue.",
+        WizardStep.Options => Inject.IsOptionsValid ? "" : "Fix the custom ini to continue.",
+        _ => !Inject.HasCommonKey ? "Add your Wii U common key in Settings to inject."
+            : !Inject.IsOutputValid ? "Choose a valid output folder." : "",
+    };
 
     /// <summary>Picks a console. Consoles that are not available are ignored.</summary>
     [RelayCommand]
@@ -183,7 +200,11 @@ public sealed partial class MainViewModel : ObservableObject
 
     partial void OnStepChanged(WizardStep value) => Refresh();
 
-    partial void OnSelectedConsoleChanged(ConsoleItem? value) => Refresh();
+    partial void OnSelectedConsoleChanged(ConsoleItem? value)
+    {
+        foreach (var c in Consoles) c.IsSelected = c == value;
+        Refresh();
+    }
 
     private bool IsComplete(WizardStep s) => s switch
     {
@@ -202,13 +223,14 @@ public sealed partial class MainViewModel : ObservableObject
         foreach (var item in Steps)
         {
             item.IsCurrent = item.Step == Step;
-            item.IsComplete = IsComplete(item.Step);
+            bool complete = IsComplete(item.Step);
+            item.IsComplete = earlierDone && complete;
             item.IsEnabled = earlierDone;
-            earlierDone &= item.IsComplete;
+            earlierDone &= complete;
         }
         foreach (var n in new[]
         {
-            nameof(IsWizard), nameof(IsRunning), nameof(IsDone), nameof(IsLastStep), nameof(IsFirstStep), nameof(CanGoNext),
+            nameof(IsWizard), nameof(IsRunning), nameof(IsDone), nameof(IsLastStep), nameof(IsFirstStep), nameof(CanGoNext), nameof(NextHint),
         })
             OnPropertyChanged(n);
         NextCommand.NotifyCanExecuteChanged();

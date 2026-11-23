@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:UWUVCI.Mac.ViewModels"
+             x:Class="UWUVCI.Mac.Views.ConsolePage"
+             x:DataType="vm:MainViewModel">
+  <StackPanel Spacing="24">
+    <StackPanel Spacing="4">
+      <TextBlock Text="Choose a console" Classes="title" />
+      <TextBlock Classes="muted"
+                 Text="Pick the system your game runs on. Only Nintendo 64 is implemented in the macOS build so far." />
+    </StackPanel>
+
+    <ItemsControl ItemsSource="{Binding Consoles}" AutomationProperties.Name="Consoles">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <UniformGrid Columns="3" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:ConsoleItem">
+          <Button Classes="tile" Classes.selected="{Binding IsSelected}" IsEnabled="{Binding Available}"
+                  Margin="0,0,12,12" MinHeight="112" Click="OnTileClick"
+                  AutomationProperties.Name="{Binding Name}"
+                  AutomationProperties.HelpText="{Binding Note}">
+            <StackPanel Spacing="6" VerticalAlignment="Top">
+              <TextBlock Text="{Binding Name}" Classes="section" />
+              <TextBlock Text="{Binding Note}" Classes="muted" />
+            </StackPanel>
+          </Button>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

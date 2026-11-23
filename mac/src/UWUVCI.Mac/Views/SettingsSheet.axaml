@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:UWUVCI.Mac.ViewModels"
+             x:Class="UWUVCI.Mac.Views.SettingsSheet"
+             x:DataType="vm:MainViewModel">
+  <Border Classes="card" Width="560" Padding="32" BoxShadow="0 8 32 0 #40000000"
+          AutomationProperties.Name="Settings">
+    <StackPanel Spacing="20">
+      <TextBlock Text="Settings" Classes="title" />
+
+      <StackPanel Spacing="6">
+        <TextBlock Text="Wii U common key" Classes="label" />
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <TextBox Text="{Binding Settings.CommonKey}" PasswordChar="•" RevealPassword="{Binding Settings.RevealKey}"
+                   MaxLength="40" FontFamily="Menlo,Monaco,monospace" PlaceholderText="32 hex characters"
+                   AutomationProperties.Name="Wii U common key" />
+          <ToggleButton Grid.Column="1" IsChecked="{Binding Settings.RevealKey}" Content="Show"
+                        AutomationProperties.Name="Reveal common key" />
+        </Grid>
+        <TextBlock Classes="muted"
+                   Text="Needed to decrypt and pack. Stored only in settings.json in your Library, readable by you alone. The app does not ship it." />
+        <TextBlock Text="{Binding Settings.CommonKeyError}" Classes="error"
+                   IsVisible="{Binding Settings.CommonKeyError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        <TextBlock Text="Key saved." Foreground="{DynamicResource SuccessText}" FontSize="13"
+                   IsVisible="{Binding Settings.IsKeyValid}" />
+      </StackPanel>
+
+      <StackPanel Spacing="6">
+        <TextBlock Text="Default output folder" Classes="label" />
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <TextBox Text="{Binding Settings.OutputDir}" AutomationProperties.Name="Default output folder" />
+          <Button Grid.Column="1" Content="Choose..." Click="OnChooseOutput" AutomationProperties.Name="Choose default output folder" />
+        </Grid>
+        <TextBlock Text="{Binding Settings.OutputDirError}" Classes="error"
+                   IsVisible="{Binding Settings.OutputDirError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      </StackPanel>
+
+      <StackPanel Spacing="6">
+        <TextBlock Text="Appearance" Classes="label" />
+        <ComboBox ItemsSource="{Binding Settings.Themes}" SelectedItem="{Binding Settings.Theme}" MinWidth="200"
+                  AutomationProperties.Name="Theme" />
+      </StackPanel>
+
+      <Button Content="Done" Classes="accent" Command="{Binding CloseOverlayCommand}" HorizontalAlignment="Right"
+              MinWidth="96" />
+    </StackPanel>
+  </Border>
+</UserControl>

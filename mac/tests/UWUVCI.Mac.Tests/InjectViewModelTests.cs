@@ -307,12 +307,4 @@ public class InjectViewModelTests
         Assert.True(f.Vm.IsOutputValid);
         Assert.Null(f.Vm.ResultPath);
     }
-
-    [Fact]
-    public void ToggleIniPreview_Flips()
-    {
-        using var f = new Fixture();
-        f.Vm.ToggleIniPreviewCommand.Execute(null);
-        Assert.True(f.Vm.IsIniPreviewOpen);
-    }
 }

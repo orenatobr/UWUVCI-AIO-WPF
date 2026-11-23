@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:UWUVCI.Mac.ViewModels"
+             x:Class="UWUVCI.Mac.Views.DoneView"
+             x:DataType="vm:MainViewModel">
+  <Border Classes="card" Width="520" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <StackPanel Spacing="16">
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <Border Width="32" Height="32" CornerRadius="16" BorderBrush="{DynamicResource SuccessText}" BorderThickness="2">
+          <Path Data="M6,12.5 L10.5,17 L18,8" Stroke="{DynamicResource SuccessText}" StrokeThickness="2.5"
+                StrokeLineCap="Round" StrokeJoin="Round" Stretch="Uniform" Margin="7" />
+        </Border>
+        <TextBlock Text="Your game is ready" Classes="title" VerticalAlignment="Center" />
+      </StackPanel>
+      <TextBlock Classes="muted" Text="Copy this folder to your Wii U or install it with your usual tool. It is in:" />
+      <SelectableTextBlock Text="{Binding Inject.ResultPath}" TextWrapping="Wrap" FontFamily="Menlo,Monaco,monospace" FontSize="12" />
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <Button Content="Show in Finder" Classes="accent" Command="{Binding ShowInFinderCommand}" />
+        <Button Content="Inject another" Command="{Binding InjectAnotherCommand}" />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

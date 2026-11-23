@@ -1,0 +1,177 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="UWUVCI.Mac.App"
+             RequestedThemeVariant="Default">
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <Color x:Key="WindowBgColor">#F5F5F7</Color>
+          <SolidColorBrush x:Key="WindowBg" Color="#F5F5F7" />
+          <SolidColorBrush x:Key="SidebarBg" Color="#ECECF0" />
+          <SolidColorBrush x:Key="CardBg" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="CardBorder" Color="#D6D6DC" />
+          <SolidColorBrush x:Key="Divider" Color="#DEDEE3" />
+          <SolidColorBrush x:Key="Muted" Color="#5B5E66" />
+          <SolidColorBrush x:Key="HoverBg" Color="#E3E3E9" />
+          <SolidColorBrush x:Key="SuccessText" Color="#17692E" />
+          <SolidColorBrush x:Key="DangerText" Color="#B3261E" />
+          <SolidColorBrush x:Key="DangerBg" Color="#FCEDEC" />
+          <SolidColorBrush x:Key="CodeBg" Color="#F0F0F4" />
+          <SolidColorBrush x:Key="AccentBrush" Color="{DynamicResource SystemAccentColor}" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="#F0F0F4" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="#E3E3E9" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#DADAE0" />
+          <SolidColorBrush x:Key="ExpanderContentBackground" Color="Transparent" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <Color x:Key="WindowBgColor">#1B1B1E</Color>
+          <SolidColorBrush x:Key="WindowBg" Color="#1B1B1E" />
+          <SolidColorBrush x:Key="SidebarBg" Color="#232326" />
+          <SolidColorBrush x:Key="CardBg" Color="#2B2B2F" />
+          <SolidColorBrush x:Key="CardBorder" Color="#3E3E44" />
+          <SolidColorBrush x:Key="Divider" Color="#38383D" />
+          <SolidColorBrush x:Key="Muted" Color="#A9ACB4" />
+          <SolidColorBrush x:Key="HoverBg" Color="#34343A" />
+          <SolidColorBrush x:Key="SuccessText" Color="#6FD58C" />
+          <SolidColorBrush x:Key="DangerText" Color="#FF9B93" />
+          <SolidColorBrush x:Key="DangerBg" Color="#3B2220" />
+          <SolidColorBrush x:Key="CodeBg" Color="#222226" />
+          <SolidColorBrush x:Key="AccentBrush" Color="{DynamicResource SystemAccentColor}" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="#222226" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="#34343A" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#3C3C42" />
+          <SolidColorBrush x:Key="ExpanderContentBackground" Color="Transparent" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme />
+
+    <!-- Type scale: 24 / 15 / 13 on an 8pt grid -->
+    <Style Selector="TextBlock.title">
+      <Setter Property="FontSize" Value="24" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.section">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.label">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Foreground" Value="{DynamicResource Muted}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.error">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Foreground" Value="{DynamicResource DangerText}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource CardBg}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Padding" Value="24" />
+    </Style>
+    <Style Selector="Border.banner">
+      <Setter Property="Background" Value="{DynamicResource DangerBg}" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="16,12" />
+    </Style>
+
+    <Style Selector="Button">
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="MinHeight" Value="36" />
+      <Setter Property="Padding" Value="16,6" />
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="MinHeight" Value="36" />
+    </Style>
+
+    <!-- Selectable tile (console cards) -->
+    <Style Selector="Button.tile">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Padding" Value="16" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Background" Value="{DynamicResource CardBg}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.tile:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource HoverBg}" />
+    </Style>
+    <Style Selector="Button.tile.selected /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+    <Style Selector="Button.tile:focus-visible /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+      <Setter Property="BorderThickness" Value="3" />
+    </Style>
+    <Style Selector="Button.tile:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{DynamicResource Muted}" />
+    </Style>
+
+    <!-- Sidebar rows -->
+    <Style Selector="Button.step:disabled, Button.tile:disabled">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="Button.step">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="12,8" />
+    </Style>
+    <Style Selector="Button.step:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource HoverBg}" />
+    </Style>
+    <Style Selector="Button.step.current /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CardBg}" />
+    </Style>
+    <Style Selector="Button.step:focus-visible /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+
+    <Style Selector="Button.step:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{DynamicResource Muted}" />
+    </Style>
+
+    <!-- Drop zone -->
+    <Style Selector="Button.drop">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="Padding" Value="24" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Background" Value="{DynamicResource CodeBg}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.drop:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource HoverBg}" />
+    </Style>
+    <Style Selector="Button.drop:focus-visible /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+      <Setter Property="BorderThickness" Value="3" />
+    </Style>
+    <Style Selector="Button.drop.over /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+  </Application.Styles>
+</Application>

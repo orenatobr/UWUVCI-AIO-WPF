@@ -109,6 +109,7 @@ public class MainViewModelTests
         var vm = Make(f);
         vm.OpenSettingsCommand.Execute(null);
         Assert.True(vm.IsSettingsOpen);
+        Assert.True(vm.IsOverlayOpen);
         vm.OpenAboutCommand.Execute(null);
         Assert.True(vm.IsAboutOpen);
         Assert.False(vm.IsSettingsOpen);
@@ -123,5 +124,32 @@ public class MainViewModelTests
         var vm = Make(f);
         Assert.True(vm.IsWizard);
         Assert.False(vm.IsRunning);
+    }
+
+    [Fact]
+    public void NextHint_ExplainsWhatIsMissing()
+    {
+        using var f = new Fixture(key: "");
+        var vm = Make(f);
+        Assert.Contains("Nintendo 64", vm.NextHint);
+        vm.SelectConsoleCommand.Execute(vm.Consoles.Single(c => c.Available));
+        Assert.Equal("", vm.NextHint);
+        vm.Step = WizardStep.Rom;
+        Assert.Contains("ROM", vm.NextHint);
+        vm.Step = WizardStep.Base;
+        Assert.Contains("base", vm.NextHint);
+        vm.Step = WizardStep.Details;
+        Assert.Contains("name", vm.NextHint);
+        vm.Step = WizardStep.Options;
+        Assert.Equal("", vm.NextHint);
+        f.Vm.SetCustomIni("/nope.ini");
+        Assert.Contains("ini", vm.NextHint);
+        vm.Step = WizardStep.Output;
+        Assert.Contains("common key", vm.NextHint);
+        f.Settings.CommonKey = TestData.ValidKey;
+        f.Vm.SetOutput("bad");
+        Assert.Contains("output", vm.NextHint);
+        f.Vm.SetOutput(Path.Combine(f.Dir.Path, "o"));
+        Assert.Equal("", vm.NextHint);
     }
 }

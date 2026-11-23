@@ -11,14 +11,14 @@ public class N64ProfilesTests
     }
 
     [Fact]
-    public void Conker_UsesEepromTimerVsyncAndExperimentalPak()
+    public void Conker_UsesEepromTimerVsync_PakOffByDefault()
     {
         var o = ProfileFor(0x30C7AC50, 0x7704072D);
         Assert.Equal(BackupType.Eeprom, o.BackupType);
         Assert.Equal("2048", o.BackupSize);
         Assert.True(o.RetraceByVsync);
         Assert.True(o.UseTimer);
-        Assert.True(o.ExpansionPak);
+        Assert.False(o.ExpansionPak);
         Assert.Equal("US", o.Region);
     }
 
@@ -29,7 +29,7 @@ public class N64ProfilesTests
         Assert.Equal(BackupType.Flash, o.BackupType);
         Assert.Null(o.BackupSize);
         Assert.True(o.UseTimer);
-        Assert.True(o.ExpansionPak);
+        Assert.False(o.ExpansionPak);
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class N64ProfilesTests
         var o = ProfileFor(0x49088A11, 0x6494957E);
         Assert.True(o.MemPack);
         Assert.False(o.Rumble);
-        Assert.True(o.ExpansionPak);
+        Assert.False(o.ExpansionPak);
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public class N64ProfilesTests
     public void PakOverride_Wins_BothWays()
     {
         Assert.False(ProfileFor(0x30C7AC50, 0x7704072D, pak: false).ExpansionPak);
-        Assert.True(ProfileFor(0xDCBC50D1, 0x09FD1AA3, pak: true).ExpansionPak);
+        Assert.True(ProfileFor(0x30C7AC50, 0x7704072D, pak: true).ExpansionPak);
     }
 
     [Fact]

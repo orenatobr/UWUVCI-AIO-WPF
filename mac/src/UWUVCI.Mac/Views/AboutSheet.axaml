@@ -30,7 +30,7 @@
           </StackPanel>
           <StackPanel Spacing="4">
             <TextBlock Text="What does the Expansion Pak option do?" Classes="label" />
-            <TextBlock Classes="muted" Text="It adds a RAM size line to the game ini. It is experimental: games that need the Expansion Pak are rated as not working in the community list, and this does not change that guarantee." />
+            <TextBlock Classes="muted" Text="It adds a RAM size line to the game ini. It is off by default because no published ini uses it and its effect is unconfirmed. Turn it on only to experiment with games that fail without it." />
           </StackPanel>
           <StackPanel Spacing="4">
             <TextBlock Text="Where is the log?" Classes="label" />

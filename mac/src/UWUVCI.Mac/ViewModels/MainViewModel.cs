@@ -126,7 +126,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         WizardStep.Console => SelectedConsole is null ? "Choose Nintendo 64 to continue." : "",
         WizardStep.Rom => Inject.IsRomValid ? "" : "Choose an N64 ROM to continue.",
-        WizardStep.Base => Inject.IsBaseSatisfied ? "" : "Choose or download a decrypted base to continue.",
+        WizardStep.Base => Inject.IsBaseSatisfied ? "" : "Choose a base to continue.",
         WizardStep.Details => Inject.IsDetailsValid ? "" : "Enter a game name (and fix any image error) to continue.",
         WizardStep.Options => Inject.IsOptionsValid ? "" : "Fix the custom ini to continue.",
         _ => !Inject.HasCommonKey ? "Add your Wii U common key in Settings to inject."

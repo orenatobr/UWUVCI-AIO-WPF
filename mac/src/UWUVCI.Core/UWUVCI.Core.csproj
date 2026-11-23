@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="N64\Data\n64-games.tsv" LogicalName="n64-games.tsv" />
+    <EmbeddedResource Include="N64\Data\n64-bases.json" LogicalName="n64-bases.json" />
   </ItemGroup>
 
   <ItemGroup>

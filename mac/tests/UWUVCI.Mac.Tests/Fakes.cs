@@ -1,4 +1,5 @@
 using UWUVCI.Core.Injection;
+using UWUVCI.Core.N64;
 using UWUVCI.Mac.Services;
 using UWUVCI.Mac.ViewModels;
 
@@ -21,6 +22,8 @@ internal sealed class FakeInjectService : IInjectService
     public Exception? Fail { get; set; }
     public TaskCompletionSource? Gate { get; set; }
     public Action<string>? OnDownload { get; set; }
+    public int DownloadCount { get; private set; }
+    public TaskCompletionSource? DownloadGate { get; set; }
 
     public async Task<string> InjectAsync(InjectRequest request, string outputRoot, string commonKey,
         IProgress<InjectProgress> progress, CancellationToken ct)
@@ -49,14 +52,16 @@ internal sealed class FakeInjectService : IInjectService
             Path.Combine(outputRoot, "[WUP][N64] Result Native SD"));
     }
 
-    public Task DownloadBaseAsync(string titleId, string titleKey, string commonKey, string destDir,
+    public async Task DownloadBaseAsync(string titleId, string titleKey, string commonKey, string destDir,
         IProgress<InjectProgress> progress, CancellationToken ct)
     {
         Download = (titleId, titleKey, destDir);
+        DownloadCount++;
         CommonKeyUsed = commonKey;
+        progress.Report(new InjectProgress(30, "Downloading"));
+        if (DownloadGate is not null) await DownloadGate.Task.WaitAsync(ct);
         if (Fail is not null) throw Fail;
         OnDownload?.Invoke(destDir);
-        return Task.CompletedTask;
     }
 }
 
@@ -76,12 +81,12 @@ internal sealed class Fixture : IDisposable
     public SettingsViewModel Settings { get; }
     public InjectViewModel Vm { get; }
 
-    public Fixture(string key = TestData.ValidKey)
+    public Fixture(string key = TestData.ValidKey, IReadOnlyList<N64Base>? bases = null)
     {
         SynchronizationContext.SetSynchronizationContext(new InlineContext());
         Store.Current = new AppSettings { CommonKey = key };
         Settings = new SettingsViewModel(Store, Path.Combine(Dir.Path, "default-out"));
-        Vm = new InjectViewModel(Service, Settings, Path.Combine(Dir.Path, "bases"));
+        Vm = new InjectViewModel(Service, Settings, Path.Combine(Dir.Path, "bases"), bases: bases);
     }
 
     public void MakeValid()

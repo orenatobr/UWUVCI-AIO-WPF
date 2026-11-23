@@ -46,4 +46,22 @@ public class SettingsStoreTests
         File.WriteAllText(path, "{ not json");
         Assert.Equal("", new JsonSettingsStore(path).Load().CommonKey);
     }
+
+    [Fact]
+    public void TitleKeys_RoundTrip_AndNeverAppearInToString()
+    {
+        using var t = new TempDir();
+        var store = new JsonSettingsStore(Path.Combine(t.Path, "settings.json"));
+        store.Save(new AppSettings
+        {
+            CommonKey = TestData.ValidKey,
+            TitleKeys = new Dictionary<string, string> { ["0005000010000001"] = "ffeeddccbbaa99887766554433221100" },
+        });
+        var back = store.Load();
+        Assert.Equal("ffeeddccbbaa99887766554433221100", back.TitleKeys["0005000010000001"]);
+        Assert.DoesNotContain("ffeeddcc", back.ToString());
+        Assert.DoesNotContain(TestData.ValidKey, back.ToString());
+        Assert.Equal(UnixFileMode.UserRead | UnixFileMode.UserWrite,
+            File.GetUnixFileMode(Path.Combine(t.Path, "settings.json")));
+    }
 }

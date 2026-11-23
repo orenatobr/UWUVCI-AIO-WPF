@@ -40,6 +40,14 @@ public enum InjectEngine
     Native,
 }
 
+/// <summary>One entry of the base dropdown. A null base is the "Choose a base..." placeholder.</summary>
+/// <param name="Base">The base, or null for the placeholder.</param>
+public sealed record BaseOption(N64Base? Base)
+{
+    /// <summary>Text shown in the dropdown.</summary>
+    public string Label => Base?.DisplayName ?? "Choose a base...";
+}
+
 /// <summary>Everything the user decides for one N64 inject, plus the run itself.</summary>
 public sealed partial class InjectViewModel : ObservableObject
 {
@@ -49,6 +57,7 @@ public sealed partial class InjectViewModel : ObservableObject
     private readonly IInjectService _service;
     private readonly SettingsViewModel _settings;
     private readonly string _basesRoot;
+    private readonly BaseOption[] _options;
     private readonly ILogger _log;
     private CancellationTokenSource? _cts;
     private RomDetection? _detection;
@@ -59,8 +68,18 @@ public sealed partial class InjectViewModel : ObservableObject
     /// <param name="settings">Source of the common key and the remembered output folder.</param>
     /// <param name="basesRoot">Folder that receives downloaded bases.</param>
     /// <param name="log">Optional logger.</param>
-    public InjectViewModel(IInjectService service, SettingsViewModel settings, string basesRoot, ILogger? log = null)
+    /// <param name="bases">The bases offered in the dropdown, the embedded N64 list by default.</param>
+    public InjectViewModel(IInjectService service, SettingsViewModel settings, string basesRoot, ILogger? log = null,
+        IReadOnlyList<N64Base>? bases = null)
     {
+        _options =
+        [
+            new BaseOption(null),
+            .. (bases ?? N64Bases.All)
+                .OrderBy(b => b.Name, StringComparer.OrdinalIgnoreCase).ThenBy(b => b.Region, StringComparer.Ordinal)
+                .Select(b => new BaseOption(b)),
+        ];
+        _selectedOption = _options[0];
         _service = service;
         _settings = settings;
         _basesRoot = basesRoot;
@@ -199,13 +218,16 @@ public sealed partial class InjectViewModel : ObservableObject
     [ObservableProperty]
     private string? _baseError;
 
-    /// <summary>Title id to download (16 hex).</summary>
-    [ObservableProperty]
-    private string _titleId = "";
+    /// <summary>The dropdown entries: a placeholder, then the known bases sorted by name and region.</summary>
+    public IReadOnlyList<BaseOption> BaseOptions => _options;
 
-    /// <summary>Title key to download (32 hex). Never logged.</summary>
+    /// <summary>The dropdown selection. The placeholder when none or when a custom folder is used.</summary>
     [ObservableProperty]
-    private string _titleKey = "";
+    private BaseOption _selectedOption;
+
+    /// <summary>The title key typed for the selected base. A secret: never logged.</summary>
+    [ObservableProperty]
+    private string _baseKeyInput = "";
 
     /// <summary>True while a download runs.</summary>
     [ObservableProperty]
@@ -217,14 +239,64 @@ public sealed partial class InjectViewModel : ObservableObject
     /// <summary>True when the base step is satisfied: a valid base, or none needed.</summary>
     public bool IsBaseSatisfied => IsNative || IsBaseValid;
 
-    partial void OnTitleIdChanged(string value) => DownloadBaseCommand.NotifyCanExecuteChanged();
+    /// <summary>The selected known base, or null.</summary>
+    public N64Base? SelectedBase => SelectedOption.Base;
 
-    partial void OnTitleKeyChanged(string value) => DownloadBaseCommand.NotifyCanExecuteChanged();
+    /// <summary>True when the ready base is a folder the user picked rather than a dropdown entry.</summary>
+    public bool IsCustomBase => IsBaseValid && SelectedBase is null;
 
-    partial void OnIsDownloadingChanged(bool value) => DownloadBaseCommand.NotifyCanExecuteChanged();
+    private N64Base? Pending => SelectedBase is not null && !IsBaseValid && !IsDownloading ? SelectedBase : null;
 
-    /// <summary>Checks a decrypted base folder (code, content, meta).</summary>
+    /// <summary>The saved key for the selected base when it still matches the hash, otherwise null.</summary>
+    private string? SavedKey()
+    {
+        var b = SelectedBase;
+        var key = b is null ? null : _settings.TitleKeyFor(b.TitleId);
+        return b is not null && TitleKey.IsValid(b, key) ? key : null;
+    }
+
+    private string? TypedKey => SelectedBase is { } b && TitleKey.IsValid(b, BaseKeyInput.Trim()) ? BaseKeyInput.Trim() : null;
+
+    /// <summary>True when the inline title key field should show: a base is chosen, not ready, and no key is saved.</summary>
+    public bool ShowKeyField => Pending is not null && SavedKey() is null;
+
+    /// <summary>True when the Download button should show.</summary>
+    public bool ShowDownload => Pending is not null;
+
+    /// <summary>"Try again" after a failed or cancelled download, otherwise "Download".</summary>
+    public string DownloadButtonText => BaseError is null ? "Download" : "Try again";
+
+    /// <summary>True when the selected base cannot download because the common key is missing.</summary>
+    public bool ShowCommonKeyHint => Pending is not null && !HasCommonKey;
+
+    /// <summary>Live validation of the typed title key, or null when empty or valid. Never repeats the input.</summary>
+    public string? BaseKeyError
+    {
+        get
+        {
+            var typed = BaseKeyInput.Trim();
+            if (typed.Length == 0 || SelectedBase is null || TypedKey is not null) return null;
+            return InputGuard.IsHex(typed, 32)
+                ? "This key does not match the selected base."
+                : "The title key is 32 hexadecimal characters.";
+        }
+    }
+
+    partial void OnSelectedOptionChanged(BaseOption value) => Revalidate();
+
+    partial void OnBaseKeyInputChanged(string value) => Revalidate();
+
+    partial void OnIsDownloadingChanged(bool value) => Revalidate();
+
+    /// <summary>Checks a decrypted base folder (code, content, meta) the user picked. Resets the dropdown.</summary>
     public void SetBase(string? path)
+    {
+        SelectedOption = _options[0];
+        BaseKeyInput = "";
+        UseBase(path);
+    }
+
+    private void UseBase(string? path)
     {
         var r = InputGuard.CheckBaseFolder(path);
         BaseDir = r.Path ?? "";
@@ -232,17 +304,54 @@ public sealed partial class InjectViewModel : ObservableObject
         Revalidate();
     }
 
-    private bool CanDownload() =>
-        !IsDownloading && InputGuard.IsHex(TitleId.Trim(), 16) && InputGuard.IsHex(TitleKey.Trim(), 32) && _settings.IsKeyValid;
-
-    /// <summary>Downloads the base from the Nintendo CDN into the app folder and selects it.</summary>
-    [RelayCommand(CanExecute = nameof(CanDownload))]
-    private async Task DownloadBaseAsync()
+    /// <summary>
+    /// Handles a pick in the dropdown: uses a copy already on disk, downloads when a matching key is saved,
+    /// otherwise waits for the user to type the key.
+    /// </summary>
+    public async Task ChooseBaseAsync(BaseOption? option)
     {
-        var id = TitleId.Trim().ToUpperInvariant();
-        var key = TitleKey.Trim();
+        if (option is null || ReferenceEquals(option, SelectedOption) || IsDownloading) return;
+        SelectedOption = option;
+        BaseKeyInput = "";
+        BaseDir = "";
+        BaseError = null;
+        Revalidate();
+        if (option.Base is not { } b) return;
+
+        var cached = Path.Combine(_basesRoot, b.FolderName);
+        if (Directory.Exists(cached) && InputGuard.CheckBaseFolder(cached).IsValid)
+        {
+            UseBase(cached);
+            return;
+        }
+        if (SavedKey() is { } key && HasCommonKey) await DownloadAsync(b, key).ConfigureAwait(true);
+    }
+
+    private bool CanDownloadSelected() =>
+        Pending is not null && HasCommonKey && (SavedKey() ?? TypedKey) is not null;
+
+    /// <summary>Downloads the selected base with the saved or typed key, saving a typed key first.</summary>
+    [RelayCommand(CanExecute = nameof(CanDownloadSelected))]
+    private async Task DownloadSelectedBaseAsync()
+    {
+        var b = SelectedBase!;
+        var key = SavedKey();
+        if (key is null)
+        {
+            key = TypedKey!;
+            _settings.SaveTitleKey(b.TitleId, key);
+            BaseKeyInput = "";
+        }
+        await DownloadAsync(b, key).ConfigureAwait(true);
+    }
+
+    private async Task DownloadAsync(N64Base b, string key)
+    {
         var commonKey = _settings.ValidKeyOrEmpty;
-        var dest = Path.Combine(_basesRoot, id);
+        var final = Path.Combine(_basesRoot, b.FolderName);
+        // Download beside the final folder and move it in only when complete, so a failed or
+        // cancelled attempt is never mistaken for a ready base.
+        var partial = final + ".partial";
         IsDownloading = true;
         BaseError = null;
         Percent = 0;
@@ -250,10 +359,14 @@ public sealed partial class InjectViewModel : ObservableObject
         var cts = _cts = new CancellationTokenSource();
         try
         {
-            _log.LogInformation("Downloading base {TitleId}", id);
-            await _service.DownloadBaseAsync(id, key, commonKey, dest, NewProgress(), cts.Token).ConfigureAwait(true);
-            SetBase(dest);
-            _log.LogInformation("Base {TitleId} ready", id);
+            _log.LogInformation("Downloading base {TitleId}", b.TitleId);
+            if (Directory.Exists(partial)) Directory.Delete(partial, true);
+            await _service.DownloadBaseAsync(b.TitleId.ToUpperInvariant(), key, commonKey, partial, NewProgress(), cts.Token)
+                .ConfigureAwait(true);
+            if (Directory.Exists(final)) Directory.Delete(final, true);
+            Directory.Move(partial, final);
+            UseBase(final);
+            _log.LogInformation("Base {TitleId} ready", b.TitleId);
         }
         catch (OperationCanceledException)
         {
@@ -268,6 +381,20 @@ public sealed partial class InjectViewModel : ObservableObject
             IsDownloading = false;
             cts.Dispose();
             _cts = null;
+            TryDeleteDirectory(partial);
+            Revalidate();
+        }
+    }
+
+    private static void TryDeleteDirectory(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path)) Directory.Delete(path, true);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // Best effort: the next download clears it first.
         }
     }
 
@@ -537,7 +664,6 @@ public sealed partial class InjectViewModel : ObservableObject
     {
         if (e.PropertyName is nameof(SettingsViewModel.CommonKey) or nameof(SettingsViewModel.IsKeyValid))
         {
-            DownloadBaseCommand.NotifyCanExecuteChanged();
             Revalidate();
         }
     }
@@ -551,9 +677,11 @@ public sealed partial class InjectViewModel : ObservableObject
             nameof(RomInDatabase), nameof(RomRegion), nameof(RomSave), nameof(RomControllers),
             nameof(RomExpansionPak), nameof(IniPreview), nameof(IsBaseValid), nameof(IsBaseSatisfied), nameof(GameNameError),
             nameof(IsDetailsValid), nameof(IsOptionsValid), nameof(OutputError), nameof(IsOutputValid),
-            nameof(HasCommonKey), nameof(CanInject),
+            nameof(HasCommonKey), nameof(CanInject), nameof(SelectedBase), nameof(IsCustomBase), nameof(ShowKeyField),
+            nameof(ShowDownload), nameof(DownloadButtonText), nameof(ShowCommonKeyHint), nameof(BaseKeyError),
         })
             OnPropertyChanged(n);
         InjectCommand.NotifyCanExecuteChanged();
+        DownloadSelectedBaseCommand.NotifyCanExecuteChanged();
     }
 }

@@ -253,47 +253,6 @@ public class InjectViewModelTests
     }
 
     [Fact]
-    public async Task Download_FillsBaseAndUsesKeyFromSettings()
-    {
-        using var f = new Fixture();
-        f.Service.OnDownload = dest =>
-        {
-            foreach (var d in new[] { "code", "content", "meta" }) Directory.CreateDirectory(Path.Combine(dest, d));
-        };
-        f.Vm.TitleId = "0005000010101234";
-        Assert.False(f.Vm.DownloadBaseCommand.CanExecute(null));
-        f.Vm.TitleKey = TestData.ValidKey;
-        Assert.True(f.Vm.DownloadBaseCommand.CanExecute(null));
-        await f.Vm.DownloadBaseCommand.ExecuteAsync(null);
-        Assert.True(f.Vm.IsBaseValid);
-        Assert.Equal(f.Service.Download!.Value.Dest, f.Vm.BaseDir);
-        Assert.StartsWith(Path.Combine(f.Dir.Path, "bases"), f.Vm.BaseDir);
-        Assert.Equal(TestData.ValidKey, f.Service.CommonKeyUsed);
-    }
-
-    [Fact]
-    public async Task Download_Failure_ShowsError()
-    {
-        using var f = new Fixture();
-        f.Vm.TitleId = "0005000010101234";
-        f.Vm.TitleKey = TestData.ValidKey;
-        f.Service.Fail = new IOException("Download failed: 404");
-        await f.Vm.DownloadBaseCommand.ExecuteAsync(null);
-        Assert.False(f.Vm.IsBaseValid);
-        Assert.Contains("404", f.Vm.BaseError);
-        Assert.False(f.Vm.IsDownloading);
-    }
-
-    [Fact]
-    public void Download_NeedsCommonKey()
-    {
-        using var f = new Fixture(key: "");
-        f.Vm.TitleId = "0005000010101234";
-        f.Vm.TitleKey = TestData.ValidKey;
-        Assert.False(f.Vm.DownloadBaseCommand.CanExecute(null));
-    }
-
-    [Fact]
     public async Task Reset_ClearsJobButKeepsBaseAndOutput()
     {
         using var f = new Fixture();

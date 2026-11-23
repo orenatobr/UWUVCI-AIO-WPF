@@ -10,6 +10,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly ISettingsStore _store;
     private readonly string _defaultOutputDir;
     private readonly bool _loading;
+    private Dictionary<string, string> _titleKeys = [];
 
     /// <summary>Loads the stored settings.</summary>
     /// <param name="store">Where settings live.</param>
@@ -23,6 +24,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         CommonKey = s.CommonKey;
         OutputDir = s.OutputDir ?? defaultOutputDir;
         Theme = s.Theme;
+        _titleKeys = new Dictionary<string, string>(s.TitleKeys, StringComparer.OrdinalIgnoreCase);
         _loading = false;
     }
 
@@ -81,6 +83,16 @@ public sealed partial class SettingsViewModel : ObservableObject
         if (InputGuard.CheckOutputFolder(dir).IsValid) OutputDir = dir;
     }
 
+    /// <summary>The title key saved for a title id, or null. The caller must check it against the base.</summary>
+    public string? TitleKeyFor(string titleId) => _titleKeys.GetValueOrDefault(titleId);
+
+    /// <summary>Saves a title key for a title id. The caller has already validated it.</summary>
+    public void SaveTitleKey(string titleId, string key)
+    {
+        _titleKeys[titleId.ToLowerInvariant()] = key;
+        Persist();
+    }
+
     [RelayCommand]
     private void ToggleReveal() => RevealKey = !RevealKey;
 
@@ -93,6 +105,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             CommonKey = CommonKey.Length == 0 ? "" : IsKeyValid ? CommonKey.Trim() : _store.Load().CommonKey,
             OutputDir = OutputDirError is null ? OutputDir : _store.Load().OutputDir,
             Theme = Theme,
+            TitleKeys = new Dictionary<string, string>(_titleKeys),
         });
     }
 }

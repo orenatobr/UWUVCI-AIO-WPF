@@ -9,7 +9,7 @@ You bring your own legally obtained ROM, base game and keys. The app ships none 
 
 Only Nintendo 64 works today. The other consoles are listed in the picker but disabled, because Core does not implement them yet.
 
-The flow is a single window with a step list: console, ROM, base, name and images, N64 options, output. You can drop a ROM or choose one, and a card shows what was detected (game, region, save type, controller accessory, Expansion Pak) with a read only preview of the ini that will be written. The base is either a decrypted folder (it must contain `code`, `content`, `meta`) or a download from a title id and title key. The Wii U common key is set once in Settings.
+The flow is a single window with a step list: console, ROM, base, name and images, N64 options, output. You can drop a ROM or choose one, and a card shows what was detected (game, region, save type, controller accessory, Expansion Pak) with a read only preview of the ini that will be written. The base is chosen from a dropdown of the 23 N64 Virtual Console bases, as in the original UWUVCI. Choosing one downloads it automatically: the first time you type that base's title key (the app checks it against a stored hash and ships no keys), it is saved in `settings.json` and later picks download with no prompt. A base already downloaded under the app folder is reused at once. Downloads need the common key from Settings. A decrypted folder (`code`, `content`, `meta`) is still available below the dropdown as a secondary option. The Wii U common key is set once in Settings.
 
 The Options step also picks the engine. Nintendo Virtual Console (default) injects into a base title you supply. Native runs the not64 emulator: no base or title key is needed, the Base step is skipped, widescreen, dark filter, Expansion Pak and custom ini are hidden, and the finished screen shows two folders, the packed title and an SD folder to copy to the root of the SD card. The native path downloads the emulator template from the not64-wiiu GitHub release when you press Inject.
 
@@ -37,7 +37,7 @@ Set `UWUVCI_SCREENSHOT_DIR` before `dotnet test` to keep the PNGs rendered by th
 
 ## What is verified
 
-- Unit tests cover the view models, the settings store (round trip, mode 600), path and file validation, and ROM detection. View model line coverage is about 95 percent.
+- Unit tests cover the view models, the settings store (round trip, mode 600), path and file validation, and ROM detection. View model line coverage is about 96 percent.
 - Headless Skia tests render each page in light and dark and fail if the XAML does not load. Screenshots are in `docs/screenshots`.
 - The app was launched with `dotnet run` on macOS and its window rendered.
 

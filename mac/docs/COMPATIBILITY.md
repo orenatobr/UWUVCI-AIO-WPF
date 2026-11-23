@@ -30,7 +30,7 @@ VI per second and recorded Banjo-Tooie at 50 in game. The two numbers were not c
 |---|---|
 | Conker's Bad Fur Day (EU) | Boots to the "For mature audiences only" screen, about 25 FPS |
 | Jet Force Gemini (US) | Boots to the title screen, about 25 FPS |
-| Banjo-Tooie (EU) | Runs the intro. Window counter about 10 FPS and the one frame captured showed a mostly dark scene with only some geometry visible. Not investigated further |
+| Banjo-Tooie (EU) | Runs the intro. The one frame captured showed a mostly dark scene with only some geometry visible. In a later 4 minute run the window counter ranged from 0.85 to 16.6 FPS, but no valid screenshots of that run exist. Not investigated further |
 | GoldenEye 007 | Not tested, no ROM available |
 | Turok, Turok 2, Turok 3, Rage Wars | Not tested, no ROM available |
 

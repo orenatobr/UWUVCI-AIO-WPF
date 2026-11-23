@@ -15,6 +15,14 @@ The Options step also picks the engine. Nintendo Virtual Console (default) injec
 
 Settings are stored in `~/Library/Application Support/UWUVCI/settings.json` with file mode 600. The log is `~/Library/Logs/UWUVCI/uwuvci.log`. Keys are never written to the log.
 
+## Apple Silicon build
+
+`scripts/package-macos.sh <version>` publishes a self-contained osx-arm64 build with ReadyToRun and
+invariant globalization, wraps it in `UWUVCI.app`, ad-hoc signs it and zips it into `dist/`. ReadyToRun
+cut the time to a visible window from about 1.85 s to about 1.24 s in a quick local measurement (3 launches
+each, one M series Mac). The bundle grows from 109 MB to 128 MB. Packing and image work run natively on
+arm64 with no Rosetta, Wine or Java.
+
 ## Build, run, test
 
 ```

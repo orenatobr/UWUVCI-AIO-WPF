@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/UWUVCI.Core/UWUVCI.Core.csproj" />
+    <Project Path="src/UWUVCI.Mac/UWUVCI.Mac.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/UWUVCI.Core.Tests/UWUVCI.Core.Tests.csproj" />
+    <Project Path="tests/UWUVCI.Mac.Tests/UWUVCI.Mac.Tests.csproj" />
   </Folder>
 </Solution>

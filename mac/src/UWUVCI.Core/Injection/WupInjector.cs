@@ -63,6 +63,35 @@ public static class WupInjector
         }
     }
 
+    /// <summary>
+    /// Native engine inject: packs the not64 title and writes the SD card files next to it.
+    /// Returns the packed title folder and the SD folder.
+    /// </summary>
+    public static NativeLayout RunNative(InjectRequest req, string templateDir, string outputRoot, string commonKey,
+        IProgress<InjectProgress>? progress = null)
+    {
+        var temp = Directory.CreateTempSubdirectory("uwuvci-native-");
+        try
+        {
+            progress?.Report(new InjectProgress(10, "Preparing native title..."));
+            var layout = Not64Injector.Prepare(templateDir, req.RomPath, req.GameName, temp.FullName, Random.Shared);
+            WriteImages(req, Path.Combine(layout.TitleDir, "meta"));
+
+            var output = UniqueOutput(outputRoot, req.Console, req.GameName + " Native");
+            progress?.Report(new InjectProgress(70, "Packing..."));
+            WupPacker.Pack(layout.TitleDir, output, commonKey);
+
+            var sdOut = output + " SD";
+            CopyDirectory(layout.SdDir, sdOut);
+            progress?.Report(new InjectProgress(100, "Done"));
+            return new NativeLayout(output, sdOut);
+        }
+        finally
+        {
+            temp.Delete(true);
+        }
+    }
+
     internal static string UniqueOutput(string root, GameConsole console, string name)
     {
         var clean = System.Text.RegularExpressions.Regex.Replace(name, "[^a-zA-Z0-9 -]", "").Trim();

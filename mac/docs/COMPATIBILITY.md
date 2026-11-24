@@ -75,10 +75,13 @@ Official Virtual Console engine, run in Cemu 2.6 on an M1 Pro (see TESTING_VC.md
 | Base download from the Nintendo CDN with real title keys (F-Zero X US, DK64 US/EU) | Works, seconds |
 | `vc-layout` + `vc-pack` on a real DK64 US base with the Conker ROM | Produces an encrypted WUP (86 MB) in about 1.5 s, twice. The WUP itself was not installed or booted. |
 | Unmodified F-Zero X base (control) | Runs at 46 to 59 FPS, 4-player race visible |
-| Banjo-Tooie on the F-Zero X base | Boots and renders textured intro scenery (up to 25 FPS). START was pressed and the picture changed; menu and gameplay not confirmed. Six ini variants (TrueBoot, UseTimer, RetraceByVsync, RamSize) gave the same picture, so none of them is shown to matter. |
+| Banjo-Tooie on the F-Zero X base (community ini) | Boots and draws a textured scene (the engine counts 50 frames/s, so it runs at full speed), but the scene never changes and no input is accepted. Tested 7 minutes with START/A, and 200 s cycling every mapped button and the D-pad. The earlier note that START changed the picture was wrong: that comparison used captures of different sizes. **Not playable.** |
+| Same, with 20 ini variants | TrueBoot, UseTimer, RetraceByVsync (all combinations), RamSize 8 MB, backup type, Rumble, RSPMultiCore, AIUseTimer, Cmp and Sound options: all identical, so the ini is not the cause. |
+| Banjo-Kazooie on the F-Zero X base (control) | Works in the same Cemu: intro cutscene, title screen, and START enters the game. This shows the Cemu setup, the interposer and the key sender are sound, and that the Banjo-Tooie hang is specific to that game. |
+| ROM integrity | Banjo-Tooie and Conker header CRCs verify (CIC 6105), so the dumps are not the cause. |
 | Banjo-Tooie on the DK64 US base | Black screen after 4 min while shaders compile; not confirmed either way |
 | Conker on the DK64 US base | Shows the DK64 base's Virtual Console info screen, not Conker; not confirmed |
-| Jet Force Gemini on the DK64 EU base | Runs at 9 to 25 FPS but the picture stays black. 13 ini variants (TrueBoot, UseTimer, RetraceByVsync, filter, copy, flush, RSP skip, RamSize, MemPak, AI timer) all stayed black. Unresolved; the cause is not known. |
+| Jet Force Gemini on the DK64 EU base | Runs at 9 to 25 FPS but the picture stays black (the community table also lists it as "only sound, no picture", and Conker as "black screen" or "no picture" on every host). 13 ini variants (TrueBoot, UseTimer, RetraceByVsync, filter, copy, flush, RSP skip, RamSize, MemPak, AI timer) all stayed black. Unresolved; the cause is not known. |
 | GoldenEye 007, Turok | Not run on any path. Unresolved blocker: no VC result exists for them, and the user asked to focus on the other three first. |
 
 Nothing above is "100% compatible". No game has been played past its first screens on the VC engine yet.
@@ -86,3 +89,7 @@ Nothing above is "100% compatible". No game has been played past its first scree
 Pipeline cost on Apple Silicon: layout plus pack of a 53 MB base takes about 1.5 s of wall time, so there is no hot path worth tuning. The startup gain comes from ReadyToRun arm64 precompilation (1.85 s to 1.24 s).
 
 Title keys: five keys from the public database at utik.91wii.com were saved into the user's settings.json (mode 600) after the user pointed to that site. They are checked against the SHA-1 list before use and are never printed or committed.
+
+## What would be needed next (not done)
+
+The community ini for these games is already what the project generates, and no ini option changes the Banjo-Tooie hang, so a fix has to come from inside the closed VESSEL engine or from patching the game code through the ini `[BreakBlockInst]` / `[Cheat]` hooks. That needs the N64 program counter and RDRAM of the running title. This session could not get them: `lldb` attach needs a macOS Developer Tools approval that only the user can give, and Cemu's GDB stub (`--enable-gdbstub`, port 1337) halts at start but did not answer an interrupt while the game ran. A breakpoint-based session through the stub, or a user-approved `lldb`, is the way to continue. Until then none of Banjo-Tooie, Conker or Jet Force Gemini works on the Virtual Console path, and GoldenEye 007 and Turok were not run.

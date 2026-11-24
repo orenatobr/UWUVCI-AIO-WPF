@@ -9,7 +9,8 @@ that is ready for the day one is.
 * An official N64 base title (for example F-Zero X, Mario Golf or Paper Mario) as a **decrypted folder** that has
   `code`, `content` and `meta`. Either copy the `bases/<name> [REGION]` folder that the Windows UWUVCI already
   downloaded, or download one in the app (choose the base in the dropdown; it asks for that base's title key
-  once, plus the Wii U common key in Settings). The app ships no keys.
+  once, plus the Wii U common key in Settings). The app ships no keys. The title key is checked against the SHA-1
+  stored in the current UWUVCI base list, so a wrong or mistyped key is rejected before any download.
 * A ROM you own, in any byte order (`.z64`, `.v64`, `.n64`).
 * Cemu 2.6 and the repository built (`cd mac && dotnet build`).
 

@@ -17,7 +17,7 @@ class G:
         o=b''
         while n>0:
             k=min(n,0x800); r=s.cmd(f'm{a:x},{k:x}')
-            if r.startswith('E') or not r: raise IOError(f'{a:x} {r}')
+            if (len(r)==3 and r.startswith('E')) or not r: raise IOError(f'{a:x} {r}')
             o+=bytes.fromhex(r); a+=k; n-=k
         return o
     def regs(s):

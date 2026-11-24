@@ -12,6 +12,9 @@ public static class Cli
             unencrypted, in <out-dir>/base. Run <out-dir>/base/code/*.rpx in Cemu to test it. The base is not changed.
         uwuvci-cli vc-pack <rom> <base-dir> <name> <out-dir> --key <32 hex> [--pak on|off]
             Same, then encrypt into an installable title with your Wii U common key.
+        uwuvci-cli base-download <title-id> <dest-dir>
+            Download and decrypt a base from the Nintendo CDN into <dest-dir>. The keys come from the environment so
+            they never appear in a command line or a log: UWUVCI_TITLE_KEY and UWUVCI_COMMON_KEY (32 hex each).
         uwuvci-cli native-layout <rom> <name> <out-dir> [--template <dir>]
             Build the unpacked native (not64) title and the SD files. Loadiine layout, runnable in Cemu.
         uwuvci-cli native-pack <rom> <name> <out-dir> --key <32 hex> [--template <dir>]
@@ -26,6 +29,7 @@ public static class Cli
             return args switch
             {
                 ["detect", var rom] => Detect(rom, output),
+                ["base-download", var titleId, var dest] => BaseDownload(titleId, dest, output),
                 ["vc-layout", var rom, var baseDir, var name, var outDir, ..var rest] => Vc(rom, baseDir, name, outDir, rest, false, output),
                 ["vc-pack", var rom, var baseDir, var name, var outDir, ..var rest] => Vc(rom, baseDir, name, outDir, rest, true, output),
                 ["native-layout", var rom, var name, var outDir, ..var rest] => Native(rom, name, outDir, rest, false, output, error),
@@ -57,6 +61,25 @@ public static class Cli
         output.WriteLine($"Known  : {game?.Name ?? "no, using safe defaults"}");
         output.WriteLine();
         output.Write(VcIni.Build(N64Profiles.For(game, header, null)));
+        return 0;
+    }
+
+    private static int BaseDownload(string titleId, string dest, TextWriter output)
+    {
+        var titleKey = Environment.GetEnvironmentVariable("UWUVCI_TITLE_KEY")
+            ?? throw new ArgumentException("Set UWUVCI_TITLE_KEY (32 hex characters).");
+        var commonKey = Environment.GetEnvironmentVariable("UWUVCI_COMMON_KEY")
+            ?? throw new ArgumentException("Set UWUVCI_COMMON_KEY (32 hex characters).");
+        var known = N64Bases.Find(titleId) ?? throw new ArgumentException("That title id is not in the N64 base list.");
+        if (!TitleKey.IsValid(known, titleKey))
+            throw new ArgumentException("The title key does not match the selected base.");
+        var last = -1;
+        var progress = new Progress<InjectProgress>(p =>
+        {
+            if (p.Percent / 10 != last) { last = p.Percent / 10; output.WriteLine($"{p.Percent,3}% {p.Message}"); }
+        });
+        BaseProvider.DownloadAsync(titleId, titleKey, commonKey, dest, progress).GetAwaiter().GetResult();
+        output.WriteLine($"Base: {dest}");
         return 0;
     }
 

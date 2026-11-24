@@ -125,7 +125,7 @@ public class ScreenshotTests
         f.Vm.InjectCommand.ExecuteAsync(null).GetAwaiter().GetResult();
     });
 
-    private static readonly N64Base Demo = new("Mario Golf", "US", "00050000101a5900", -1576894338);
+    private static readonly N64Base Demo = new("Mario Golf", "US", "00050000101a5900", "B1775A785F09A6EBAF2DC33D6EAEB98974D9CDB8");
 
     [Fact]
     public Task BaseKeyPrompt_Light() => Render("10-base-key-light", ThemeVariant.Light, (f, vm) =>

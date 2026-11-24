@@ -8,12 +8,12 @@ namespace UWUVCI.Core.N64;
 /// <param name="Name">Game name.</param>
 /// <param name="Region">EU, US or JP.</param>
 /// <param name="TitleId">16 hex characters.</param>
-/// <param name="KeyHash">Hash of the lower case title key, used to check a typed key (see <see cref="TitleKey"/>).</param>
+/// <param name="KeyHash">SHA-1 (40 hex characters) of the lower case title key text, used to check a typed key (see <see cref="TitleKey"/>).</param>
 public sealed record N64Base(
     [property: JsonPropertyName("name")] string Name,
     [property: JsonPropertyName("region")] string Region,
     [property: JsonPropertyName("titleId")] string TitleId,
-    [property: JsonPropertyName("keyHash")] int KeyHash)
+    [property: JsonPropertyName("keyHash")] string KeyHash)
 {
     /// <summary>Text for lists, such as "Mario Golf (US)".</summary>
     [JsonIgnore]
@@ -48,24 +48,12 @@ public static class N64Bases
 /// <summary>Checks a typed title key against the hash stored for a base. No key is ever stored or shipped.</summary>
 public static class TitleKey
 {
-    /// <summary>True when <paramref name="key"/> is 32 hex characters whose hash matches the base. Case insensitive.</summary>
+    /// <summary>True when <paramref name="key"/> is 32 hex characters whose SHA-1 matches the base. Case insensitive.</summary>
     public static bool IsValid(N64Base b, string? key) =>
-        key is { Length: 32 } && key.All(Uri.IsHexDigit) && Hash(key.ToLowerInvariant()) == b.KeyHash;
+        key is { Length: 32 } && key.All(Uri.IsHexDigit)
+        && string.Equals(Sha1Hex(key.ToLowerInvariant()), b.KeyHash, StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>The deterministic string hash of the original UWUVCI (the classic .NET Framework algorithm).</summary>
-    public static int Hash(string str)
-    {
-        unchecked
-        {
-            int hash1 = (5381 << 16) + 5381;
-            int hash2 = hash1;
-            for (int i = 0; i < str.Length; i += 2)
-            {
-                hash1 = ((hash1 << 5) + hash1) ^ str[i];
-                if (i == str.Length - 1) break;
-                hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
-            }
-            return hash1 + (hash2 * 1566083941);
-        }
-    }
+    /// <summary>Upper case hex SHA-1 of the UTF-8 text, the format the current UWUVCI base list uses.</summary>
+    public static string Sha1Hex(string text) =>
+        Convert.ToHexString(System.Security.Cryptography.SHA1.HashData(System.Text.Encoding.UTF8.GetBytes(text)));
 }

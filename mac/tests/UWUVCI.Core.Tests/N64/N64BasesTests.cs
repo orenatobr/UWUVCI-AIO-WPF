@@ -5,9 +5,10 @@ namespace UWUVCI.Core.Tests.N64;
 public class N64BasesTests
 {
     [Fact]
-    public void All_LoadsTwentyThreeBases()
+    public void All_LoadsTheElevenCurrentBases()
     {
-        Assert.Equal(23, N64Bases.All.Count);
+        Assert.Equal(11, N64Bases.All.Count);
+        Assert.All(N64Bases.All, b => Assert.Equal(40, b.KeyHash.Length));
         Assert.All(N64Bases.All, b => Assert.Equal(16, b.TitleId.Length));
     }
 
@@ -22,20 +23,18 @@ public class N64BasesTests
         Assert.Null(N64Bases.Find("nope"));
     }
 
-    // Values computed independently with a Python port of the original GetDeterministicHashCode.
+    // Computed independently with Python hashlib: sha1 of the lower case key text, upper case hex.
     [Theory]
-    [InlineData("", 757602046)]
-    [InlineData("a", -842352707)]
-    [InlineData("ab", 938310215)]
-    [InlineData("0123456789abcdef0123456789abcdef", -1576894338)]
-    [InlineData("00000000000000000000000000000000", -1245272322)]
-    public void Hash_MatchesKnownValues(string text, int expected) =>
-        Assert.Equal(expected, TitleKey.Hash(text));
+    [InlineData("", "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709")]
+    [InlineData("0123456789abcdef0123456789abcdef", "B1775A785F09A6EBAF2DC33D6EAEB98974D9CDB8")]
+    [InlineData("00000000000000000000000000000000", "91D3D1F86024E49F0E35314258B357A8944068A1")]
+    public void Sha1Hex_MatchesKnownValues(string text, string expected) =>
+        Assert.Equal(expected, TitleKey.Sha1Hex(text));
 
     [Fact]
     public void IsValid_AcceptsMatchingKeyCaseInsensitively()
     {
-        var b = new N64Base("Test", "US", "0005000010000000", -1576894338);
+        var b = new N64Base("Test", "US", "0005000010000000", "B1775A785F09A6EBAF2DC33D6EAEB98974D9CDB8");
         Assert.True(TitleKey.IsValid(b, "0123456789abcdef0123456789abcdef"));
         Assert.True(TitleKey.IsValid(b, "0123456789ABCDEF0123456789ABCDEF"));
     }
@@ -47,11 +46,11 @@ public class N64BasesTests
     [InlineData("zz23456789abcdef0123456789abcdef")]
     public void IsValid_RejectsWrongOrMalformed(string key)
     {
-        var b = new N64Base("Test", "US", "0005000010000000", -1576894338);
+        var b = new N64Base("Test", "US", "0005000010000000", "B1775A785F09A6EBAF2DC33D6EAEB98974D9CDB8");
         Assert.False(TitleKey.IsValid(b, key));
     }
 
     [Fact]
     public void Base_ToString_HasNoKeyHash() =>
-        Assert.DoesNotContain("1576894338", new N64Base("T", "US", "0005000010000000", -1576894338).DisplayName);
+        Assert.DoesNotContain("B1775A78", new N64Base("T", "US", "0005000010000000", "B1775A785F09A6EBAF2DC33D6EAEB98974D9CDB8").DisplayName);
 }

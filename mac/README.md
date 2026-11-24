@@ -5,6 +5,16 @@ The conversion and packing logic lives in `src/UWUVCI.Core`. `src/UWUVCI.Mac` is
 
 You bring your own legally obtained ROM, base game and keys. The app ships none of them.
 
+## Install
+
+On an Apple Silicon Mac:
+
+```
+curl -fsSL https://raw.githubusercontent.com/orenatobr/UWUVCI-AIO-WPF/main/mac/install.sh | bash
+```
+
+It downloads the latest release, checks its SHA-256, installs `UWUVCI.app` into `/Applications` (or `~/Applications` if that is not writable) and clears the quarantine flag, because the app is ad-hoc signed and not notarized. Read the script first if you like: `mac/install.sh`.
+
 ## Scope
 
 Only Nintendo 64 works today. The other consoles are listed in the picker but disabled, because Core does not implement them yet. Each card has a small line art icon (a pad, handheld or keyboard silhouette drawn as vector geometry, no logos) in its own accent colour.

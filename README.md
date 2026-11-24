@@ -7,7 +7,13 @@
  This fork adds a native macOS app in [`mac/`](mac/README.md). It runs without Wine, packs titles with a
  managed encrypter and can build N64 titles on the official Virtual Console engine or on the native not64
  engine. Only N64 is available there for now. See [`mac/docs/COMPATIBILITY.md`](mac/docs/COMPATIBILITY.md) for
- what was actually run. Download the latest zip from the Releases page.
+ what was actually run. Install it with:
+
+ ```
+ curl -fsSL https://raw.githubusercontent.com/orenatobr/UWUVCI-AIO-WPF/main/mac/install.sh | bash
+ ```
+
+ or download the zip from the Releases page.
 
  ## Systems Supported
  

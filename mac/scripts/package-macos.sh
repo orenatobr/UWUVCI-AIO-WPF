@@ -45,4 +45,7 @@ PLIST
 rm -rf dist/publish
 codesign --force --deep --sign - "$APP"
 ditto -c -k --keepParent "$APP" "dist/UWUVCI-macOS-arm64-$VERSION.zip"
+# Stable names, so the installer can use releases/latest/download without knowing the version.
+cp "dist/UWUVCI-macOS-arm64-$VERSION.zip" dist/UWUVCI-macOS-arm64.zip
+(cd dist && shasum -a 256 UWUVCI-macOS-arm64.zip > UWUVCI-macOS-arm64.zip.sha256)
 echo "Built dist/UWUVCI-macOS-arm64-$VERSION.zip"

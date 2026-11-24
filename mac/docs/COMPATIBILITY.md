@@ -65,3 +65,24 @@ These need something only the owner can provide:
   games run well under full speed. That is emulator work in not64-wiiu, not in this app. Conker's later
   frames in my runs were black and the cause was not found.
 * **Real hardware:** every run so far is in Cemu.
+
+## Tested vs untested (2026-11-24)
+
+Official Virtual Console engine, run in Cemu 2.6 on an M1 Pro (see TESTING_VC.md for the Cemu workaround):
+
+| Item | Result |
+| --- | --- |
+| Base download from the Nintendo CDN with real title keys (F-Zero X US, DK64 US/EU) | Works, seconds |
+| `vc-layout` + `vc-pack` on a real DK64 US base with the Conker ROM | Produces an encrypted WUP (86 MB) in about 1.5 s, twice. The WUP itself was not installed or booted. |
+| Unmodified F-Zero X base (control) | Runs at 46 to 59 FPS, 4-player race visible |
+| Banjo-Tooie on the F-Zero X base | Boots and renders textured intro scenery (up to 25 FPS). START was pressed and the picture changed; menu and gameplay not confirmed. Six ini variants (TrueBoot, UseTimer, RetraceByVsync, RamSize) gave the same picture, so none of them is shown to matter. |
+| Banjo-Tooie on the DK64 US base | Black screen after 4 min while shaders compile; not confirmed either way |
+| Conker on the DK64 US base | Shows the DK64 base's Virtual Console info screen, not Conker; not confirmed |
+| Jet Force Gemini on the DK64 EU base | Window runs at about 20 FPS but the picture is black; ini search in progress |
+| GoldenEye 007, Turok | Not run on any path (dropped by the user's request) |
+
+Nothing above is "100% compatible". No game has been played past its first screens on the VC engine yet.
+
+Pipeline cost on Apple Silicon: layout plus pack of a 53 MB base takes about 1.5 s of wall time, so there is no hot path worth tuning. The startup gain comes from ReadyToRun arm64 precompilation (1.85 s to 1.24 s).
+
+Title keys: five keys from the public database at utik.91wii.com were saved into the user's settings.json (mode 600) after the user pointed to that site. They are checked against the SHA-1 list before use and are never printed or committed.

@@ -11,6 +11,20 @@ permissions:
   contents: read
 
 jobs:
+  # Hosted macOS runners are often unavailable, so the portable code (Core and the view models) is also
+  # built and tested on Linux to give a signal that does not depend on them.
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Build
+        run: dotnet build mac/UWUVCI.Mac.slnx -c Release -warnaserror
+      - name: Test
+        run: dotnet test mac/UWUVCI.Mac.slnx -c Release --no-build
+
   build:
     runs-on: macos-latest
     steps:

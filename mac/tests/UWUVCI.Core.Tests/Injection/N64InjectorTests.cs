@@ -101,3 +101,41 @@ public class N64InjectorTests
         Assert.Equal(new byte[] { 1, 2, 3, 4 }, File.ReadAllBytes(Path.Combine(b.Content, "rom", "NAAE.z64")));
     }
 }
+
+public class N64InjectorTargetGameTests
+{
+    private static byte[] Rom(uint c1, uint c2)
+    {
+        var rom = new byte[0x100];
+        rom[0] = 0x80; rom[1] = 0x37; rom[2] = 0x12; rom[3] = 0x40;
+        for (int i = 0; i < 4; i++) { rom[0x10 + i] = (byte)(c1 >> (24 - 8 * i)); rom[0x14 + i] = (byte)(c2 >> (24 - 8 * i)); }
+        System.Text.Encoding.ASCII.GetBytes("TEST").CopyTo(rom, 0x20);
+        return rom;
+    }
+
+    private static string InjectAndReadIni(uint c1, uint c2)
+    {
+        using var b = new TestBase();
+        var romFile = Path.Combine(b.Root.FullName, "g.z64");
+        File.WriteAllBytes(romFile, Rom(c1, c2));
+        N64Injector.Inject(b.Root.FullName, romFile, new N64Options());
+        return File.ReadAllText(Path.Combine(b.Content, "config", "NAAE.z64.ini"));
+    }
+
+    [Theory]
+    [InlineData(0x30C7AC50u, 0x7704072Du, "Conker", "BackupType = 3")]
+    [InlineData(0x8A6009B6u, 0x94ACE150u, "Jet Force Gemini", "BackupType = 2")]
+    [InlineData(0xC2E9AA9Au, 0x475D70AAu, "Banjo-Tooie", "BackupType = 3")]
+    [InlineData(0xDCBC50D1u, 0x09FD1AA3u, "GoldenEye", "BackupSize = 512")]
+    [InlineData(0x2F70F10Du, 0x5C4187FFu, "Turok - Dinosaur Hunter", "MemPack = 1")]
+    [InlineData(0x49088A11u, 0x6494957Eu, "Turok 2", "MemPack = 1")]
+    [InlineData(0x89A579F1u, 0x667E97EFu, "Turok 3", "MemPack = 1")]
+    [InlineData(0xADB9498Bu, 0xDAF28F55u, "Turok - Rage Wars", "MemPack = 1")]
+    public void TargetGames_GetAnIniWithTheirSaveSetup(uint c1, uint c2, string game, string expected)
+    {
+        var ini = InjectAndReadIni(c1, c2);
+        Assert.Contains(game, ini);
+        Assert.Contains(expected, ini);
+        Assert.DoesNotContain("RamSize", ini); // Expansion Pak stays off unless the user asks
+    }
+}

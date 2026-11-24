@@ -183,4 +183,23 @@ public class ScreenshotTests
 
     [Fact]
     public Task ConsolePage_Dark() => Render("14-console-dark", ThemeVariant.Dark, (_, vm) => SelectN64(vm));
+
+    [Fact]
+    public Task NavigationButtons_HaveMacShortcuts() => Session.Value.Dispatch(() =>
+    {
+        using var f = new Fixture();
+        var vm = new MainViewModel(f.Settings, f.Vm) { RevealAction = _ => { } };
+        var window = new MainWindow { DataContext = vm };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+        var buttons = Avalonia.VisualTree.VisualExtensions.GetVisualDescendants(window).OfType<Avalonia.Controls.Button>().ToList();
+        var wanted = new Dictionary<string, string> { ["Back"] = "Cmd+Left", ["Continue"] = "Cmd+Return", ["Inject"] = "Cmd+Return" };
+        foreach (var (label, gesture) in wanted)
+        {
+            var b = buttons.Single(x => x.Content as string == label);
+            Assert.Equal(Avalonia.Input.KeyGesture.Parse(gesture), b.HotKey);
+        }
+        Assert.Contains(buttons, x => x.HotKey == Avalonia.Input.KeyGesture.Parse("Cmd+OemComma"));
+        window.Close();
+    }, CancellationToken.None);
 }

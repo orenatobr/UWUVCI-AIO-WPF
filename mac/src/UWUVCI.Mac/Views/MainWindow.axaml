@@ -22,7 +22,7 @@
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Bottom" Spacing="4">
-          <Button Classes="step" Command="{Binding OpenSettingsCommand}" AutomationProperties.Name="Open settings">
+          <Button Classes="step" Command="{Binding OpenSettingsCommand}" HotKey="Cmd+OemComma" ToolTip.Tip="Settings (⌘,)" AutomationProperties.Name="Open settings">
             <TextBlock Text="Settings" />
           </Button>
           <Button Classes="step" Command="{Binding OpenAboutCommand}" AutomationProperties.Name="Open about and FAQ">
@@ -83,7 +83,7 @@
         <Border Grid.Row="1" Background="{DynamicResource SidebarBg}" BorderBrush="{DynamicResource Divider}"
                 BorderThickness="0,1,0,0" Padding="40,16">
           <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-            <Button Grid.Column="0" Content="Back" Command="{Binding BackCommand}"
+            <Button Grid.Column="0" Content="Back" Command="{Binding BackCommand}" HotKey="Cmd+Left" ToolTip.Tip="Back (⌘←)"
                     IsVisible="{Binding !IsFirstStep}" />
             <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center" Spacing="2">
               <TextBlock Text="{Binding Inject.ErrorMessage}" Classes="error"
@@ -91,9 +91,9 @@
               <TextBlock Text="{Binding NextHint}" Classes="muted"
                          IsVisible="{Binding NextHint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
             </StackPanel>
-            <Button Grid.Column="2" Content="Continue" Classes="accent" Command="{Binding NextCommand}"
+            <Button Grid.Column="2" Content="Continue" Classes="accent" Command="{Binding NextCommand}" HotKey="Cmd+Return" ToolTip.Tip="Continue (⌘↩)"
                     IsVisible="{Binding !IsLastStep}" MinWidth="120" />
-            <Button Grid.Column="3" Content="Inject" Classes="accent" Command="{Binding Inject.InjectCommand}"
+            <Button Grid.Column="3" Content="Inject" Classes="accent" Command="{Binding Inject.InjectCommand}" HotKey="Cmd+Return" ToolTip.Tip="Inject (⌘↩)"
                     IsVisible="{Binding IsLastStep}" MinWidth="200" MinHeight="48" FontSize="16" FontWeight="SemiBold"
                     HorizontalContentAlignment="Center" AutomationProperties.Name="Inject the game" />
           </Grid>

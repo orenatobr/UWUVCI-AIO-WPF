@@ -33,6 +33,10 @@ cut the time to a visible window from about 1.85 s to about 1.24 s in a quick lo
 each, one M series Mac). The bundle grows from 109 MB to 128 MB. Packing and image work run natively on
 arm64 with no Rosetta, Wine or Java.
 
+## Command line
+
+`src/UWUVCI.Cli` builds titles without the window: `detect`, `vc-layout`, `vc-pack`, `native-layout` and `native-pack` (run it with no arguments for the usage). `tools/cemu-test.sh` runs a title in Cemu and captures only its window. The steps for checking a Virtual Console inject are in [docs/TESTING_VC.md](docs/TESTING_VC.md).
+
 ## Build, run, test
 
 ```

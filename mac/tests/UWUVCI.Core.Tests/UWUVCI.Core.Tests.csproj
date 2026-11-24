@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\UWUVCI.Core\UWUVCI.Core.csproj" />
+    <ProjectReference Include="..\..\src\UWUVCI.Cli\UWUVCI.Cli.csproj" />
   </ItemGroup>
 
 </Project>

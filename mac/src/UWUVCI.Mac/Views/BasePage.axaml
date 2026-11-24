@@ -18,13 +18,50 @@
     <StackPanel Spacing="24" IsVisible="{Binding Inject.IsBaseRequired}">
     <Border Classes="card">
       <StackPanel Spacing="12">
-        <TextBlock Text="Use a decrypted base folder" Classes="section" />
-        <TextBlock Classes="muted" Text="The folder must contain code, content and meta." />
-        <StackPanel Orientation="Horizontal" Spacing="12">
-          <Button Content="Choose folder..." Click="OnChooseFolder" AutomationProperties.Name="Choose base folder" />
-          <TextBlock Text="{Binding Inject.BaseDir}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
-                     MaxWidth="460" IsVisible="{Binding Inject.IsBaseValid}" />
+        <TextBlock Text="Base game" Classes="section" />
+        <TextBlock Classes="muted"
+                   Text="Pick the Wii U game to inject into. It downloads when you choose it, using the title key you enter once." />
+        <ComboBox x:Name="BaseCombo" ItemsSource="{Binding Inject.BaseOptions}"
+                  SelectedItem="{Binding Inject.SelectedOption, Mode=OneWay}"
+                  SelectionChanged="OnBaseSelected" IsEnabled="{Binding !Inject.IsDownloading}"
+                  HorizontalAlignment="Left" Width="460" MinHeight="36"
+                  AutomationProperties.Name="Base game">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:BaseOption">
+              <TextBlock Text="{Binding Label}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <StackPanel Spacing="8" IsVisible="{Binding Inject.ShowKeyField}">
+          <TextBlock Text="Title key (32 hex characters)" Classes="label" />
+          <TextBox Text="{Binding Inject.BaseKeyInput}" PasswordChar="•" MaxLength="32" Width="460"
+                   HorizontalAlignment="Left" FontFamily="Menlo,Monaco,monospace"
+                   AutomationProperties.Name="Title key" />
+          <TextBlock Text="{Binding Inject.BaseKeyError}" Classes="error"
+                     IsVisible="{Binding Inject.BaseKeyError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <TextBlock Classes="muted" Text="The key is checked here and kept on this Mac, so you only enter it once." />
         </StackPanel>
+
+        <StackPanel Spacing="8" IsVisible="{Binding Inject.ShowCommonKeyHint}">
+          <TextBlock Classes="error" Text="Downloads need your Wii U common key." />
+          <Button Classes="link" Content="Open Settings to add it" Command="{Binding OpenSettingsCommand}"
+                  HorizontalAlignment="Left" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Spacing="12" IsVisible="{Binding Inject.ShowDownload}">
+          <Button Content="{Binding Inject.DownloadButtonText}" Classes="accent"
+                  Command="{Binding Inject.DownloadSelectedBaseCommand}" AutomationProperties.Name="Download base" />
+        </StackPanel>
+
+        <StackPanel Spacing="8" IsVisible="{Binding Inject.IsDownloading}">
+          <ProgressBar Value="{Binding Inject.Percent}" Maximum="100" AutomationProperties.Name="Download progress" />
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <TextBlock Text="{Binding Inject.ProgressMessage}" Classes="muted" VerticalAlignment="Center" />
+            <Button Content="Cancel" Command="{Binding Inject.CancelCommand}" />
+          </StackPanel>
+        </StackPanel>
+
         <TextBlock Text="Base ready." Foreground="{DynamicResource SuccessText}"
                    IsVisible="{Binding Inject.IsBaseValid}" />
         <TextBlock Text="{Binding Inject.BaseError}" Classes="error"
@@ -32,29 +69,16 @@
       </StackPanel>
     </Border>
 
-    <Border Classes="card">
-      <StackPanel Spacing="12">
-        <TextBlock Text="Or download one" Classes="section" />
-        <TextBlock Classes="muted"
-                   Text="Enter the title id and title key of a base you are entitled to use. Downloads use your common key from Settings." />
-        <TextBlock Classes="error" Text="Add your Wii U common key in Settings first."
-                   IsVisible="{Binding !Inject.HasCommonKey}" />
-        <TextBlock Text="Title id (16 hex characters)" Classes="label" />
-        <TextBox Text="{Binding Inject.TitleId}" PlaceholderText="0005000010..." MaxLength="16"
-                 FontFamily="Menlo,Monaco,monospace" AutomationProperties.Name="Title id" />
-        <TextBlock Text="Title key (32 hex characters)" Classes="label" />
-        <TextBox Text="{Binding Inject.TitleKey}" PasswordChar="•" MaxLength="32"
-                 FontFamily="Menlo,Monaco,monospace" AutomationProperties.Name="Title key" />
-        <StackPanel Orientation="Horizontal" Spacing="12">
-          <Button Content="Download base" Command="{Binding Inject.DownloadBaseCommand}" />
-          <Button Content="Cancel" Command="{Binding Inject.CancelCommand}" IsVisible="{Binding Inject.IsDownloading}" />
-        </StackPanel>
-        <StackPanel Spacing="4" IsVisible="{Binding Inject.IsDownloading}">
-          <ProgressBar Value="{Binding Inject.Percent}" Maximum="100" AutomationProperties.Name="Download progress" />
-          <TextBlock Text="{Binding Inject.ProgressMessage}" Classes="muted" />
-        </StackPanel>
+    <StackPanel Spacing="8">
+      <TextBlock Text="Already have a decrypted base?" Classes="muted" />
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <Button Content="Use a decrypted base folder..." Click="OnChooseFolder"
+                AutomationProperties.Name="Choose base folder" />
+        <TextBlock Text="{Binding Inject.BaseDir}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                   MaxWidth="360" IsVisible="{Binding Inject.IsCustomBase}" />
       </StackPanel>
-    </Border>
+      <TextBlock Classes="muted" Text="The folder must contain code, content and meta." />
+    </StackPanel>
     </StackPanel>
   </StackPanel>
 </UserControl>

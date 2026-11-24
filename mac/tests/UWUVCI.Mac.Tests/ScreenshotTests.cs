@@ -4,6 +4,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using UWUVCI.Core.Injection;
+using UWUVCI.Core.N64;
 using UWUVCI.Mac;
 using UWUVCI.Mac.Services;
 using UWUVCI.Mac.ViewModels;
@@ -37,10 +38,11 @@ public class ScreenshotTests
         return dir;
     }
 
-    private static Task Render(string name, ThemeVariant theme, Action<Fixture, MainViewModel> arrange) =>
+    private static Task Render(string name, ThemeVariant theme, Action<Fixture, MainViewModel> arrange,
+        IReadOnlyList<N64Base>? bases = null) =>
         Session.Value.Dispatch(() =>
         {
-            using var f = new Fixture();
+            using var f = new Fixture(bases: bases);
             var vm = new MainViewModel(f.Settings, f.Vm) { RevealAction = _ => { } };
             arrange(f, vm);
             Application.Current!.RequestedThemeVariant = theme;
@@ -122,4 +124,63 @@ public class ScreenshotTests
         f.MakeValidNative();
         f.Vm.InjectCommand.ExecuteAsync(null).GetAwaiter().GetResult();
     });
+
+    private static readonly N64Base Demo = new("Mario Golf", "US", "00050000101a5900", -1576894338);
+
+    [Fact]
+    public Task BaseKeyPrompt_Light() => Render("10-base-key-light", ThemeVariant.Light, (f, vm) =>
+    {
+        SelectN64(vm);
+        f.Vm.SetRom(f.Dir.File("bt.z64", TestData.BanjoTooie()));
+        vm.Step = WizardStep.Base;
+        f.Vm.ChooseBaseAsync(f.Vm.BaseOptions.Single(o => o.Base == Demo)).GetAwaiter().GetResult();
+        f.Vm.BaseKeyInput = "00000000000000000000000000000000";
+    }, [Demo]);
+
+    [Fact]
+    public Task BaseDownloading_Dark() => Render("11-base-downloading-dark", ThemeVariant.Dark, (f, vm) =>
+    {
+        SelectN64(vm);
+        f.Vm.SetRom(f.Dir.File("bt.z64", TestData.BanjoTooie()));
+        vm.Step = WizardStep.Base;
+        f.Settings.SaveTitleKey(Demo.TitleId, "0123456789abcdef0123456789abcdef");
+        f.Service.DownloadGate = new TaskCompletionSource();
+        _ = f.Vm.ChooseBaseAsync(f.Vm.BaseOptions.Single(o => o.Base == Demo));
+    }, [Demo]);
+
+    [Fact]
+    public Task BaseReady_Light() => Render("12-base-ready-light", ThemeVariant.Light, (f, vm) =>
+    {
+        SelectN64(vm);
+        f.Vm.SetRom(f.Dir.File("bt.z64", TestData.BanjoTooie()));
+        vm.Step = WizardStep.Base;
+        f.Dir.Base(Path.Combine("bases", Demo.FolderName));
+        f.Vm.ChooseBaseAsync(f.Vm.BaseOptions.Single(o => o.Base == Demo)).GetAwaiter().GetResult();
+    }, [Demo]);
+
+    [Fact]
+    public Task BaseNoCommonKey_Dark() => Render("13-base-no-common-key-dark", ThemeVariant.Dark, (f, vm) =>
+    {
+        SelectN64(vm);
+        f.Vm.SetRom(f.Dir.File("bt.z64", TestData.BanjoTooie()));
+        vm.Step = WizardStep.Base;
+        f.Settings.CommonKey = "";
+        f.Vm.ChooseBaseAsync(f.Vm.BaseOptions.Single(o => o.Base == Demo)).GetAwaiter().GetResult();
+    }, [Demo]);
+
+    [Fact]
+    public Task ConsoleIcons_HaveGeometryAndAccentInBothThemes() => Session.Value.Dispatch(() =>
+    {
+        var app = Application.Current!;
+        foreach (var item in ConsoleItem.All())
+        {
+            Assert.True(app.TryGetResource("Icon." + item.IconKey, null, out var geo), item.IconKey);
+            Assert.IsAssignableFrom<Avalonia.Media.Geometry>(geo);
+            foreach (var theme in new[] { ThemeVariant.Light, ThemeVariant.Dark })
+                Assert.True(app.TryGetResource("Console." + item.IconKey, theme, out _), item.IconKey + " " + theme);
+        }
+    }, CancellationToken.None);
+
+    [Fact]
+    public Task ConsolePage_Dark() => Render("14-console-dark", ThemeVariant.Dark, (_, vm) => SelectN64(vm));
 }

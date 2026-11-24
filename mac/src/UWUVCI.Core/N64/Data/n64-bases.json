@@ -1,0 +1,140 @@
+[
+  {
+    "name": "1080° Snowboarding",
+    "region": "JP",
+    "titleId": "00050000101a5a00",
+    "keyHash": 764562499
+  },
+  {
+    "name": "1080° Snowboarding",
+    "region": "US",
+    "titleId": "00050000101a5b00",
+    "keyHash": -1885730783
+  },
+  {
+    "name": "Donkey Kong 64",
+    "region": "JP",
+    "titleId": "0005000010199100",
+    "keyHash": 1210560548
+  },
+  {
+    "name": "Donkey Kong 64",
+    "region": "US",
+    "titleId": "0005000010199200",
+    "keyHash": 2018764825
+  },
+  {
+    "name": "Donkey Kong 64",
+    "region": "EU",
+    "titleId": "0005000010199300",
+    "keyHash": -206720283
+  },
+  {
+    "name": "Excitebike 64",
+    "region": "JP",
+    "titleId": "00050000101e6400",
+    "keyHash": -213595829
+  },
+  {
+    "name": "Excitebike 64",
+    "region": "US",
+    "titleId": "00050000101e6500",
+    "keyHash": -1079661577
+  },
+  {
+    "name": "F-Zero X",
+    "region": "JP",
+    "titleId": "00050000101ebb00",
+    "keyHash": -565957635
+  },
+  {
+    "name": "F-Zero X",
+    "region": "US",
+    "titleId": "00050000101ebc00",
+    "keyHash": -1036835128
+  },
+  {
+    "name": "Mario Golf",
+    "region": "JP",
+    "titleId": "00050000101a5800",
+    "keyHash": -574082111
+  },
+  {
+    "name": "Mario Golf",
+    "region": "US",
+    "titleId": "00050000101a5900",
+    "keyHash": 241403104
+  },
+  {
+    "name": "Mario Party 2",
+    "region": "JP",
+    "titleId": "00050000101c5c00",
+    "keyHash": 127986179
+  },
+  {
+    "name": "Mario Party 2",
+    "region": "US",
+    "titleId": "00050000101c5d00",
+    "keyHash": 289504955
+  },
+  {
+    "name": "Paper Mario",
+    "region": "JP",
+    "titleId": "0005000010199600",
+    "keyHash": 266286924
+  },
+  {
+    "name": "Paper Mario",
+    "region": "US",
+    "titleId": "0005000010199700",
+    "keyHash": 519583299
+  },
+  {
+    "name": "Paper Mario",
+    "region": "EU",
+    "titleId": "0005000010199800",
+    "keyHash": -551238474
+  },
+  {
+    "name": "Sin & Punishment",
+    "region": "JP",
+    "titleId": "00050000101b4700",
+    "keyHash": 180215824
+  },
+  {
+    "name": "Sin & Punishment",
+    "region": "US",
+    "titleId": "00050000101b4800",
+    "keyHash": -435048495
+  },
+  {
+    "name": "Super Mario 64",
+    "region": "JP",
+    "titleId": "0005000010199400",
+    "keyHash": -1301829593
+  },
+  {
+    "name": "Super Mario 64",
+    "region": "US",
+    "titleId": "0005000010199500",
+    "keyHash": -1272541618
+  },
+  {
+    "name": "The Legend of Zelda: Majora's Mask",
+    "region": "JP",
+    "titleId": "00050000101bae00",
+    "keyHash": 902711632
+  },
+  {
+    "name": "The Legend of Zelda: Majora's Mask",
+    "region": "US",
+    "titleId": "00050000101baf00",
+    "keyHash": 1137069054
+  },
+  {
+    "name": "The Legend of Zelda: Majora's Mask",
+    "region": "EU",
+    "titleId": "00050000101bb000",
+    "keyHash": 618143220
+  }
+]

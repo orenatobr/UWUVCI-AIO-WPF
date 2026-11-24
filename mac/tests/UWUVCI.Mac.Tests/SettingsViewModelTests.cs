@@ -79,4 +79,19 @@ public class SettingsViewModelTests
         vm.ToggleRevealCommand.Execute(null);
         Assert.True(vm.RevealKey);
     }
+
+    [Fact]
+    public void TitleKeys_AreSavedPerTitleId_AndReloaded()
+    {
+        var store = new MemoryStore();
+        var vm = new SettingsViewModel(store, "/tmp/d");
+        Assert.Null(vm.TitleKeyFor("0005000010000001"));
+        vm.SaveTitleKey("0005000010000001", TestData.ValidKey);
+        Assert.Equal(TestData.ValidKey, vm.TitleKeyFor("0005000010000001"));
+        Assert.Equal(TestData.ValidKey, vm.TitleKeyFor("0005000010000001".ToUpperInvariant()));
+        Assert.Equal(TestData.ValidKey, store.Current.TitleKeys["0005000010000001"]);
+        Assert.Equal(TestData.ValidKey, new SettingsViewModel(store, "/tmp/d").TitleKeyFor("0005000010000001"));
+        vm.Theme = ThemeChoice.Dark;
+        Assert.Equal(TestData.ValidKey, store.Current.TitleKeys["0005000010000001"]);
+    }
 }

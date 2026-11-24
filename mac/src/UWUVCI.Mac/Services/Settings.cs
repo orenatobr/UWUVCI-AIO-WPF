@@ -26,6 +26,12 @@ public sealed record AppSettings
     /// <summary>Theme override.</summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ThemeChoice Theme { get; init; } = ThemeChoice.System;
+
+    /// <summary>Title keys the user typed, by lower case title id. Secrets: never log them.</summary>
+    public IReadOnlyDictionary<string, string> TitleKeys { get; init; } = new Dictionary<string, string>();
+
+    /// <summary>Prints nothing from the fields, so a key can not reach a log or an error by accident.</summary>
+    public override string ToString() => nameof(AppSettings);
 }
 
 /// <summary>Persistence for <see cref="AppSettings"/>.</summary>

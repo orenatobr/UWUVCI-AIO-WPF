@@ -82,7 +82,7 @@ Official Virtual Console engine, run in Cemu 2.6 on an M1 Pro (see TESTING_VC.md
 | Banjo-Tooie on the DK64 US base | Black screen after 4 min while shaders compile; not confirmed either way |
 | Conker on the DK64 US base | Shows the DK64 base's Virtual Console info screen, not Conker; not confirmed |
 | Jet Force Gemini on the DK64 EU base | Runs at 9 to 25 FPS but the picture stays black (the community table also lists it as "only sound, no picture", and Conker as "black screen" or "no picture" on every host). 13 ini variants (TrueBoot, UseTimer, RetraceByVsync, filter, copy, flush, RSP skip, RamSize, MemPak, AI timer) all stayed black. Unresolved; the cause is not known. |
-| GoldenEye 007, Turok | Not run on any path. Unresolved blocker: no VC result exists for them, and the user asked to focus on the other three first. |
+| GoldenEye 007, Turok | Not run on any path: there is no GoldenEye or Turok ROM on the development machine (searched the home folder), and ROMs cannot be downloaded. Drop the ROM next to the others and run `tools/vc-play.py` to test. The community table lists GoldenEye US as "corrupted textures, crashes" on the DK64 host and Turok Dinosaur Hunter as "glitchy, freezes". |
 
 Nothing above is "100% compatible". No game has been played past its first screens on the VC engine yet.
 
@@ -100,3 +100,8 @@ What is known:
 * The N64 RDRAM could not be located. The readable guest ranges are 0x01800000-0x01C00000, 0x02000000-0x50000000, 0xE0000000-0xE4000000, 0xE8000000-0xEA000000, 0xF4000000-0xFA000000 and 0xFFC00000-0xFFD00000. A search for the ROM boot code (three byte orders) and a scan for MIPS function prologues found nothing, and the same scan also finds nothing for Banjo-Kazooie, so the method is not able to see the emulated RAM. `lldb` attach needs a macOS Developer Tools approval that only the user can give.
 
 What would continue this work: a way to see the N64 RDRAM and program counter of the running title (an `lldb` session once approved, or a breakpoint at the VC engine's display list entry through the stub), then use the ini `[BreakBlockInst]` / `[Cheat]` hooks or a ROM patch for the instruction that blocks. Until then none of Banjo-Tooie, Conker or Jet Force Gemini works on the Virtual Console path, and GoldenEye 007 and Turok were not run.
+
+## Status of the other goals (2026-11-24)
+
+* **Apple Silicon build.** The app is a self-contained `osx-arm64` build with ReadyToRun precompilation (window in about 1.24 s instead of 1.85 s, median of 3 launches on an M1 Pro). Packing a 53 MB base takes about 1.5 s, so there is no other hot path to tune. No GPU or Metal specific work was done.
+* **UI.** The window was built following the repository's UI guidelines for Avalonia (light and dark themes, console picker with icons, base dropdown with download). It has headless render tests, but there was no formal review against the `/ui-guidelines` checklist, so that is not claimed.

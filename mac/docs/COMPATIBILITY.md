@@ -78,8 +78,8 @@ Official Virtual Console engine, run in Cemu 2.6 on an M1 Pro (see TESTING_VC.md
 | Banjo-Tooie on the F-Zero X base | Boots and renders textured intro scenery (up to 25 FPS). START was pressed and the picture changed; menu and gameplay not confirmed. Six ini variants (TrueBoot, UseTimer, RetraceByVsync, RamSize) gave the same picture, so none of them is shown to matter. |
 | Banjo-Tooie on the DK64 US base | Black screen after 4 min while shaders compile; not confirmed either way |
 | Conker on the DK64 US base | Shows the DK64 base's Virtual Console info screen, not Conker; not confirmed |
-| Jet Force Gemini on the DK64 EU base | Window runs at about 20 FPS but the picture is black; ini search in progress |
-| GoldenEye 007, Turok | Not run on any path (dropped by the user's request) |
+| Jet Force Gemini on the DK64 EU base | Runs at 9 to 25 FPS but the picture stays black. 13 ini variants (TrueBoot, UseTimer, RetraceByVsync, filter, copy, flush, RSP skip, RamSize, MemPak, AI timer) all stayed black. Unresolved; the cause is not known. |
+| GoldenEye 007, Turok | Not run on any path. Unresolved blocker: no VC result exists for them, and the user asked to focus on the other three first. |
 
 Nothing above is "100% compatible". No game has been played past its first screens on the VC engine yet.
 

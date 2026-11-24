@@ -49,6 +49,18 @@ that is ready for the day one is.
 5. Write the result in `docs/COMPATIBILITY.md`: game, region, base used, ini, what you saw and for how long.
    "Booted" and "playable" are different results; say which.
 
+## Cemu on macOS: two things that matter
+
+* **Crash (Bus error 10) while loading a VC title.** Cemu 2.6 for macOS crashes inside MoltenVK when it converts
+  the deeply nested shader of the N64 VC emulator: the recursion overflows the 512 KB default thread stack.
+  `tools/bigstack.c` is a tiny DYLD interposer that gives every thread a 128 MB stack. It needs a copy of
+  Cemu.app re-signed ad hoc (the shipped one is hardened and ignores `DYLD_INSERT_LIBRARIES`) and the x86_64
+  build, since Cemu 2.6 is x86_64 under Rosetta. See the header of `tools/cemu-test.sh` for the commands. With it,
+  an unmodified F-Zero X base runs at 46 to 59 FPS here, so the engine and the setup work.
+* **First run is slow.** Some bases (Donkey Kong 64 for one) compile a lot of shaders the first time, and the
+  title shows a black screen or "loading" for several minutes. Their pipelines are cached afterwards. The
+  F-Zero X base starts in under a minute.
+
 ## Notes
 
 * Cemu can run an unencrypted title directly, so no encryption or install is needed for testing. That has been

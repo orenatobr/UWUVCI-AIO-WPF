@@ -85,4 +85,34 @@ public class CliTests
         Assert.Equal(2, code);
         Assert.Contains("vc-layout", err);
     }
+
+    [Fact]
+    public void BaseDownload_WithoutKeys_FailsBeforeAnyNetwork()
+    {
+        Environment.SetEnvironmentVariable("UWUVCI_TITLE_KEY", null);
+        Environment.SetEnvironmentVariable("UWUVCI_COMMON_KEY", null);
+        var (code, _, err) = Run("base-download", "00050000101a5900", "/tmp/uwuvci-never");
+        Assert.Equal(2, code);
+        Assert.Contains("UWUVCI_TITLE_KEY", err);
+    }
+
+    [Fact]
+    public void BaseDownload_WrongTitleKey_IsRejectedWithoutEchoingIt()
+    {
+        const string wrong = "00000000000000000000000000000000";
+        Environment.SetEnvironmentVariable("UWUVCI_TITLE_KEY", wrong);
+        Environment.SetEnvironmentVariable("UWUVCI_COMMON_KEY", wrong);
+        try
+        {
+            var (code, _, err) = Run("base-download", "00050000101a5900", "/tmp/uwuvci-never");
+            Assert.Equal(2, code);
+            Assert.Contains("does not match", err);
+            Assert.DoesNotContain(wrong, err);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("UWUVCI_TITLE_KEY", null);
+            Environment.SetEnvironmentVariable("UWUVCI_COMMON_KEY", null);
+        }
+    }
 }

@@ -33,9 +33,11 @@ cut the time to a visible window from about 1.85 s to about 1.24 s in a quick lo
 each, one M series Mac). The bundle grows from 109 MB to 128 MB. Packing and image work run natively on
 arm64 with no Rosetta, Wine or Java.
 
+Scope of the optimization: that is all. Packing a 53 MB base takes about 1.5 s on an M1 Pro, so there is no hot path worth parallelizing, and no Metal or Accelerate work was done because the app does no GPU or numeric work. The Wii U title itself is produced by the same steps as on Windows, so performance on the console does not depend on the Mac.
+
 ## Command line
 
-`src/UWUVCI.Cli` builds titles without the window: `detect`, `vc-layout`, `vc-pack`, `native-layout` and `native-pack` (run it with no arguments for the usage). `tools/cemu-test.sh` runs a title in Cemu and captures only its window. The steps for checking a Virtual Console inject are in [docs/TESTING_VC.md](docs/TESTING_VC.md).
+`src/UWUVCI.Cli` builds titles without the window: `detect`, `vc-layout`, `vc-pack`, `native-layout` and `native-pack`, `base-download` (run it with no arguments for the usage). `tools/cemu-test.sh` runs a title in Cemu and captures only its window. The steps for checking a Virtual Console inject are in [docs/TESTING_VC.md](docs/TESTING_VC.md).
 
 ## Build, run, test
 

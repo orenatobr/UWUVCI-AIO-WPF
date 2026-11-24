@@ -1,140 +1,68 @@
 [
   {
-    "name": "1080° Snowboarding",
-    "region": "JP",
-    "titleId": "00050000101a5a00",
-    "keyHash": 764562499
-  },
-  {
-    "name": "1080° Snowboarding",
+    "name": "F-Zero X",
     "region": "US",
-    "titleId": "00050000101a5b00",
-    "keyHash": -1885730783
-  },
-  {
-    "name": "Donkey Kong 64",
-    "region": "JP",
-    "titleId": "0005000010199100",
-    "keyHash": 1210560548
-  },
-  {
-    "name": "Donkey Kong 64",
-    "region": "US",
-    "titleId": "0005000010199200",
-    "keyHash": 2018764825
-  },
-  {
-    "name": "Donkey Kong 64",
-    "region": "EU",
-    "titleId": "0005000010199300",
-    "keyHash": -206720283
-  },
-  {
-    "name": "Excitebike 64",
-    "region": "JP",
-    "titleId": "00050000101e6400",
-    "keyHash": -213595829
-  },
-  {
-    "name": "Excitebike 64",
-    "region": "US",
-    "titleId": "00050000101e6500",
-    "keyHash": -1079661577
+    "titleId": "00050000101ebc00",
+    "keyHash": "E619BCA89906AF75928D2F85CCCFED7FAC9CED7F"
   },
   {
     "name": "F-Zero X",
     "region": "JP",
     "titleId": "00050000101ebb00",
-    "keyHash": -565957635
+    "keyHash": "A61892384ED33BC84DDF8D39619F43E8E684F58D"
   },
   {
-    "name": "F-Zero X",
-    "region": "US",
-    "titleId": "00050000101ebc00",
-    "keyHash": -1036835128
-  },
-  {
-    "name": "Mario Golf",
-    "region": "JP",
-    "titleId": "00050000101a5800",
-    "keyHash": -574082111
-  },
-  {
-    "name": "Mario Golf",
-    "region": "US",
-    "titleId": "00050000101a5900",
-    "keyHash": 241403104
-  },
-  {
-    "name": "Mario Party 2",
-    "region": "JP",
-    "titleId": "00050000101c5c00",
-    "keyHash": 127986179
-  },
-  {
-    "name": "Mario Party 2",
-    "region": "US",
-    "titleId": "00050000101c5d00",
-    "keyHash": 289504955
-  },
-  {
-    "name": "Paper Mario",
-    "region": "JP",
-    "titleId": "0005000010199600",
-    "keyHash": 266286924
-  },
-  {
-    "name": "Paper Mario",
-    "region": "US",
-    "titleId": "0005000010199700",
-    "keyHash": 519583299
-  },
-  {
-    "name": "Paper Mario",
+    "name": "Donkey Kong 64",
     "region": "EU",
-    "titleId": "0005000010199800",
-    "keyHash": -551238474
+    "titleId": "0005000010199300",
+    "keyHash": "022D23A1DAB11D4B672D42F94555FCE742099EB6"
   },
   {
-    "name": "Sin & Punishment",
-    "region": "JP",
-    "titleId": "00050000101b4700",
-    "keyHash": 180215824
-  },
-  {
-    "name": "Sin & Punishment",
+    "name": "Donkey Kong 64",
     "region": "US",
-    "titleId": "00050000101b4800",
-    "keyHash": -435048495
+    "titleId": "0005000010199200",
+    "keyHash": "768F5F44AB5FADE9D2473EFBB0F0FFE4208E4B62"
   },
   {
-    "name": "Super Mario 64",
+    "name": "Donkey Kong 64",
     "region": "JP",
-    "titleId": "0005000010199400",
-    "keyHash": -1301829593
+    "titleId": "0005000010199100",
+    "keyHash": "AA7BF0FF1EB55D245F8ED3F37F759F57DC676FD3"
   },
   {
     "name": "Super Mario 64",
     "region": "US",
     "titleId": "0005000010199500",
-    "keyHash": -1272541618
+    "keyHash": "90ED075133942986D9F2536E12D258C20492B6D3"
   },
   {
-    "name": "The Legend of Zelda: Majora's Mask",
+    "name": "Super Mario 64",
     "region": "JP",
-    "titleId": "00050000101bae00",
-    "keyHash": 902711632
+    "titleId": "0005000010199400",
+    "keyHash": "EB0FF1CD067ED3BA40D8FBBA19B844B825387735"
   },
   {
-    "name": "The Legend of Zelda: Majora's Mask",
-    "region": "US",
-    "titleId": "00050000101baf00",
-    "keyHash": 1137069054
-  },
-  {
-    "name": "The Legend of Zelda: Majora's Mask",
+    "name": "Paper Mario",
     "region": "EU",
-    "titleId": "00050000101bb000",
-    "keyHash": 618143220
+    "titleId": "0005000010199800",
+    "keyHash": "E4D73EE7DEBA6F45BD28BB961756285993C9AE0E"
+  },
+  {
+    "name": "Paper Mario",
+    "region": "US",
+    "titleId": "0005000010199700",
+    "keyHash": "14F5B7B2C3B4ACD91FFB8764B408199E8A48BEC3"
+  },
+  {
+    "name": "Paper Mario",
+    "region": "JP",
+    "titleId": "0005000010199600",
+    "keyHash": "CC67F5466BD8C90E029DFAD6DA8427273B5B8B3C"
+  },
+  {
+    "name": "Mario Golf",
+    "region": "US",
+    "titleId": "00050000101a5900",
+    "keyHash": "1829936F7663F8473D4F14B248FC0FA596DFE1AA"
   }
 ]

@@ -6,9 +6,9 @@ namespace UWUVCI.Mac.Tests;
 
 public class BaseSelectionTests
 {
-    // TestData.BaseKey hashes to this value (computed independently, see N64BasesTests).
-    private static readonly N64Base Game = new("Test Game", "US", "0005000010000001", -1576894338);
-    private static readonly N64Base Other = new("Another Game", "EU", "0005000010000002", 12345);
+    // BaseKey hashes to this SHA-1 (computed independently, see N64BasesTests).
+    private static readonly N64Base Game = new("Test Game", "US", "0005000010000001", "B1775A785F09A6EBAF2DC33D6EAEB98974D9CDB8");
+    private static readonly N64Base Other = new("Another Game", "EU", "0005000010000002", "1C7313922EA106D22DBE3C9C3E4E880C1DE83501");
     private static readonly N64Base[] Bases = [Game, Other];
 
     private const string BaseKey = "0123456789abcdef0123456789abcdef";
@@ -27,7 +27,7 @@ public class BaseSelectionTests
     {
         using var f = new Fixture();
         var o = f.Vm.BaseOptions;
-        Assert.Equal(24, o.Count);
+        Assert.Equal(12, o.Count);
         Assert.Null(o[0].Base);
         Assert.Equal("Choose a base...", o[0].Label);
         Assert.Same(o[0], f.Vm.SelectedOption);

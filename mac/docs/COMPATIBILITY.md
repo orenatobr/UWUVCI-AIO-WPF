@@ -4,18 +4,19 @@ Two engines can run an injected N64 game. This page says what was actually run a
 
 ## Engines
 
-**Nintendo Virtual Console (VC).** The emulator inside the official N64 titles. UWUVCI swaps the ROM and
-writes a per game ini. The upstream list rates Conker, Jet Force Gemini, Turok 2, Turok 3 and Rage Wars as
-not working, and GoldenEye and Banjo-Tooie as having issues. This build picks the ini automatically
-(save type, rumble or controller pak, timing flags) from the ROM checksum and from the community inis in
-UWUVCI-IMAGES. It was **not run** here: it needs an official base title and its title key, which this
-project does not ship and the author did not have.
+**Nintendo Virtual Console (VC) is the engine this project is about.** The requested deliverable is these
+games ported through the VC injection, like the other UWUVCI games: the ROM goes into an official N64 base
+title and runs on Nintendo's own emulator, configured by a per game ini. The upstream list rates Conker, Jet
+Force Gemini, Turok 2, Turok 3 and Rage Wars as not working there, and GoldenEye and Banjo-Tooie as having
+issues. This build picks the ini automatically (save type, rumble or controller pak, timing flags) from the ROM
+checksum and from the community inis in UWUVCI-IMAGES. **It was never run here**: it needs an official base
+title and its title key, which this project does not ship and which were not available on the machine that
+built it. So none of the five games has been verified on this path.
 
-**Native (not64).** The not64-wiiu emulator packed as its own title, with the ROM on the SD card
-(`sd:/not64/roms` and `sd:/not64/autoboot.txt`). It does not depend on the VC emulator, so it does not
-inherit its limits. It needs only the Wii U common key to encrypt the title.
-
-Both engines are selectable in the app on the Options step. The native choice in the UI was only checked with a fake service and headless renders. The results table below comes from `uwuvci-cli native-layout`, not from the UI.
+**Native (not64) is an extra, experimental fallback, not the VC port.** It packs the not64-wiiu emulator as its
+own title and keeps the ROM on the SD card. It does not depend on the VC emulator, so it does not inherit the
+VC limits, but it is a different thing from what was asked and it was only used here because a VC test was not
+possible. Everything under "What was run" below is about this fallback.
 
 ## What was run
 
@@ -36,7 +37,7 @@ fix. Details and the host test are in the not64-wiiu repository.
 |---|---|
 | Banjo-Tooie (EU) | Before 0.6.0: the intro showed a grid of flat coloured blocks. With 0.6.0 and a title built by this app: the intro terrain is textured and the title screen shows the logo and Banjo, window counter about 16 to 21 FPS. Nobody played further |
 | Jet Force Gemini (US) | Reaches its title screen (before and after 0.6.0), now with the "press start" prompt and textured lighting in the frame captured with 0.6.0 |
-| Conker's Bad Fur Day (EU) | Reached its "For mature audiences only" screen in one early run. In later runs, with the old and the new emulator alike, the captured frames at 40 and 80 s were black, so 0.6.0 made no visible difference there. Not investigated further |
+| Conker's Bad Fur Day (EU) | Reaches its intro (the squirrel and the big N) and the main menu ("GAME 1", "Insert Rumble Pak"). The old emulator (0.5.2) reached the same menu in a control run but with broken textures (noise, a missing clock face, garbled walls); 0.6.0 shows them correctly. The earlier black frames were the game's loading phase, not a failure |
 | GoldenEye 007 | Not tested, no ROM available |
 | Turok, Turok 2, Turok 3, Rage Wars | Not tested, no ROM available |
 

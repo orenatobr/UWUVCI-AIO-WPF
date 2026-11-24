@@ -105,3 +105,9 @@ What would continue this work: a way to see the N64 RDRAM and program counter of
 
 * **Apple Silicon build.** The app is a self-contained `osx-arm64` build with ReadyToRun precompilation (window in about 1.24 s instead of 1.85 s, median of 3 launches on an M1 Pro). Packing a 53 MB base takes about 1.5 s, so there is no other hot path to tune. No GPU or Metal specific work was done.
 * **UI.** The window was reviewed against the `/ui-guidelines` Avalonia checklist (accessibility, keyboard, focus, dark mode). Findings: accessible names are present on icon buttons, inputs and tiles; visible focus styles exist on the custom buttons; the one gap was the keyboard, which is now fixed with macOS shortcuts (Back ⌘←, Continue and Inject ⌘↩, Settings ⌘,) and a test. Contrast values were not measured with a tool, so they are not claimed as verified.
+
+## More negative results and what they mean for a real Wii U (2026-11-24)
+
+* **ROM size is not the cause.** The three failing games have ROMs larger than 16 MB (32, 32 and 64 MB). Banjo-Kazooie padded with zeros to 32 MB runs exactly like the 16 MB version on the same base.
+* **It is not just slow.** Banjo-Tooie left running for 28 minutes (START pressed every 30 s) shows the same scene; only the water texture changes.
+* **The community table describes real Wii U hardware**, not Cemu (its notes mention Loadiine and GX2). For Banjo-Tooie (Europe) on the F-Zero X US base it lists "works with ini" using exactly the ini this app writes, with a known crash at one spot in the Terrydactyland train cutscene. So the Banjo-Tooie freeze seen here may be specific to Cemu. This cannot be confirmed without a Wii U, so the title the app builds follows the documented recipe, and the Cemu result is reported as a Cemu result. Conker and Jet Force Gemini are listed as not working on real hardware too (no picture), so no known-good recipe exists for them.

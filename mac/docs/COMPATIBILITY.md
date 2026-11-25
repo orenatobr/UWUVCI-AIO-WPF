@@ -113,3 +113,5 @@ What would continue this work: a way to see the N64 RDRAM and program counter of
 * **The community table describes real Wii U hardware**, not Cemu (its notes mention Loadiine and GX2). For Banjo-Tooie (Europe) on the F-Zero X US base it lists "works with ini" using exactly the ini this app writes, with a known crash at one spot in the Terrydactyland train cutscene. So the Banjo-Tooie freeze seen here may be specific to Cemu. This cannot be confirmed without a Wii U, so the title the app builds follows the documented recipe, and the Cemu result is reported as a Cemu result. Conker and Jet Force Gemini are listed as not working on real hardware too (no picture), so no known-good recipe exists for them.
 
 The full list of ini keys the engine reads, and what was tried with the graphics task keys, is in `VC_INI_KEYS.md`.
+
+A scan of 1.3 GB of readable guest memory for the code the engine's JIT emits to reach the N64 RAM (`lis r27,0x1337; ori r27,r27,0x2760`) found no match in 29 minutes, so that route to the RDRAM base is also closed with the stub alone.

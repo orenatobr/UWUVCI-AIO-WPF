@@ -57,6 +57,23 @@ public class CliTests
     }
 
     [Fact]
+    public void VcLayout_WidescreenFlag_StretchesTheFrameLayout()
+    {
+        using var b = new TestBase();
+        File.WriteAllBytes(Path.Combine(b.Content, "FrameLayout.arc"), FrameLayoutArc.Build());
+        var work = Directory.CreateTempSubdirectory();
+        try
+        {
+            var (code, _, _) = Run("vc-layout", Rom(work.FullName), b.Root.FullName, "G", Path.Combine(work.FullName, "o"), "--widescreen", "--no-dark-filter");
+            Assert.Equal(0, code);
+            var arc = File.ReadAllBytes(Path.Combine(work.FullName, "o", "base", "content", "FrameLayout.arc"));
+            Assert.Equal(new byte[] { 0x44, 0xF0, 0x00, 0x00 }, arc[FrameLayoutArc.FrameWidthOffset..(FrameLayoutArc.FrameWidthOffset + 4)]);
+            Assert.Equal(0, arc[FrameLayoutArc.MaskFlagOffset]);
+        }
+        finally { work.Delete(true); }
+    }
+
+    [Fact]
     public void VcLayout_MissingBase_FailsWithAMessage()
     {
         var (code, _, err) = Run("vc-layout", "/nope.z64", "/nope-base", "G", "/tmp/uwuvci-never");

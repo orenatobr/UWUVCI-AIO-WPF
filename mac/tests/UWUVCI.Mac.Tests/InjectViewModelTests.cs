@@ -61,6 +61,31 @@ public class InjectViewModelTests
     }
 
     [Fact]
+    public void SaveChoice_Sram_UpdatesPreview_AndAutoFollowsTheProfile()
+    {
+        using var f = new Fixture();
+        f.Vm.SetRom(f.Dir.File("bt.z64", TestData.BanjoTooie()));
+        Assert.Contains("BackupType = 3", f.Vm.IniPreview);          // Banjo-Tooie: EEPROM, as on a Wii U
+        f.Vm.SaveChoice = SaveChoice.Sram;
+        Assert.Contains("BackupType = 1", f.Vm.IniPreview);
+        Assert.DoesNotContain("BackupSize", f.Vm.IniPreview);
+        f.Vm.SaveChoice = SaveChoice.Profile;
+        Assert.Contains("BackupType = 3", f.Vm.IniPreview);
+    }
+
+    [Fact]
+    public async Task SaveChoice_IsSentInTheRequest_AndResetClearsIt()
+    {
+        using var f = new Fixture();
+        f.MakeValid();
+        f.Vm.SaveChoice = SaveChoice.Flash;
+        await f.Vm.InjectCommand.ExecuteAsync(null);
+        Assert.Equal(UWUVCI.Core.N64.BackupType.Flash, f.Service.Request!.N64!.SaveType);
+        f.Vm.Reset();
+        Assert.Equal(SaveChoice.Profile, f.Vm.SaveChoice);
+    }
+
+    [Fact]
     public void SetBase_ValidatesFolder()
     {
         using var f = new Fixture();

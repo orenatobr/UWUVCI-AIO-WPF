@@ -32,7 +32,7 @@ public static class N64Injector
         else
         {
             var game = N64GameDatabase.Find(header.Crc1, header.Crc2);
-            File.WriteAllText(iniPath, VcIni.Build(N64Profiles.For(game, header, options.ExpansionPak)));
+            File.WriteAllText(iniPath, VcIni.Build(N64Profiles.For(game, header, options.ExpansionPak, options.SaveType)));
         }
 
         if (options.WideScreen || options.DarkFilter)

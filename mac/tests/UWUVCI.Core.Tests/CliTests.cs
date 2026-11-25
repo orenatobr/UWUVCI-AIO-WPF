@@ -73,6 +73,32 @@ public class CliTests
         finally { work.Delete(true); }
     }
 
+    [Theory]
+    [InlineData("sram", "BackupType = 1")]
+    [InlineData("flash", "BackupType = 2")]
+    [InlineData("eeprom", "BackupType = 3")]
+    [InlineData("auto", "BackupType = 0")]
+    public void VcLayout_SaveTypeFlag_SetsBackupType(string value, string expected)
+    {
+        using var b = new TestBase();
+        var work = Directory.CreateTempSubdirectory();
+        try
+        {
+            var (code, _, _) = Run("vc-layout", Rom(work.FullName), b.Root.FullName, "G", Path.Combine(work.FullName, "o"), "--save-type", value);
+            Assert.Equal(0, code);
+            Assert.Contains(expected, File.ReadAllText(Path.Combine(work.FullName, "o", "base", "content", "config", "NAAE.z64.ini")));
+        }
+        finally { work.Delete(true); }
+    }
+
+    [Fact]
+    public void VcLayout_UnknownSaveType_FailsWithAMessage()
+    {
+        var (code, _, err) = Run("vc-layout", "/nope.z64", "/nope-base", "G", "/tmp/uwuvci-never", "--save-type", "tape");
+        Assert.NotEqual(0, code);
+        Assert.Contains("--save-type", err);
+    }
+
     [Fact]
     public void VcLayout_MissingBase_FailsWithAMessage()
     {

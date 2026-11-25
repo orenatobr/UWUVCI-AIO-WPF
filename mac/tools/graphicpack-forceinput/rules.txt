@@ -1,0 +1,6 @@
+[Definition]
+titleIds = 0005000200000000
+name = UWUVCI force START
+path = "UWUVCI/force start"
+description = Presses START on pad 1 through the VC engine (development only)
+version = 7

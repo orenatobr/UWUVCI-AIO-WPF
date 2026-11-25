@@ -59,7 +59,7 @@ public class N64ProfilesTests
     public void BanjoTooieEu_ClipsTheRightEdgeSoThePictureFillsTheFrame()
     {
         var o = N64Profiles.For(null, new RomHeader(1, 2, "Banjo-Tooie (E)", "NB7P"), null);
-        Assert.Contains("[Render]\nClipRight = 55", o.ExtraSections);
+        Assert.Contains("[Render]\nClipRight = 33", o.ExtraSections);   // the right 5% of the EU picture is black; 55 also cut real content
         Assert.Contains("StickModify = 2", o.ExtraSections);   // the existing section is kept
     }
 

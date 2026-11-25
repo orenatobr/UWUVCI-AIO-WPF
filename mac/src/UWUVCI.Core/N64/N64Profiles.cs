@@ -46,7 +46,7 @@ public static class N64Profiles
 
         o = Tune(name, o);
         if (saveOverride is { } save)
-            o = o with { BackupType = save, BackupSize = save == BackupType.Eeprom ? o.BackupSize ?? "512" : null };
+            o = o with { BackupType = save, BackupSize = save == BackupType.Eeprom ? o.BackupSize ?? (game?.Save == SaveKind.Eeprom16K ? "2048" : "512") : null };
         // No published ini sets RamSize, so the Expansion Pak stays off unless the user asks for it.
         return o with { ExpansionPak = pakOverride ?? false };
     }

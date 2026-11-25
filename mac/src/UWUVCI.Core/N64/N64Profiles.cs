@@ -11,9 +11,11 @@ public static class N64Profiles
 {
     private const string BanjoInput = "[Input]\nStickModify = 2\n";
 
-    // The PAL picture of the VC engine is drawn 5% short of the frame (a black bar on the right). The community
-    // fixes this for Banjo-Kazooie with ClipRight = 55, and the same value fills the frame exactly for Banjo-Tooie (EU).
-    private const string BanjoEuRender = "\n[Render]\nClipRight = 55\n";
+    // The PAL picture of the VC engine is drawn 5% short of the frame (a black bar on the right). The community uses
+    // ClipRight = 55 for Banjo-Kazooie, but measured on Banjo-Tooie (EU) in Cemu that cuts about 3.7% of the real picture
+    // and stretches the rest; the bar is 5.0% of the width, and ClipRight = 33 removes exactly the bar (the picture then
+    // covers 100.1% of the frame and the whole scene is still there).
+    private const string BanjoEuRender = "\n[Render]\nClipRight = 33\n";
 
     private const string GoldenEyeJp =
         "[BreakBlockInst]\nCount = 1\nAddress0 = 0x7f0d0eeC\nInst0 = 0x24420004\nJmpPC0= 0x7f0d0ee8\nType0 = 1\n\n" +

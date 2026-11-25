@@ -167,3 +167,17 @@ Observed while testing: after a fresh start Banjo-Tooie spends a while on its fi
 Next steps: try the Wii U Pro Controller type in Cemu instead of the GamePad (the VC has separate handling for the GamePad, Classic and Pro types), and launch the title under `lldb` from the start to read the SI state in the first scene.
 
 Update: the same input test with the emulated controller set to the Wii U Pro Controller type instead of the GamePad gives the same result (NO CONTROLLER in every frame, START and the other keys ignored, the intro plays by itself), so the controller type is not the cause either. Not tried yet: launching the title under `lldb` from the start to read the SI state in the first scene, and checking the Banjo-Tooie ini on a real Wii U, where the community table reports the game working.
+
+## Reliable testing, and what the Banjo-Tooie ini keys do (2026-11-25, afternoon)
+
+**Use a direct launch for hang tests.** The same title that reaches the title screen at about 30 s when Cemu is started directly (`tools/repeat-launch.py`, `tools/ini-variants.py`: plain `Popen`, output to /dev/null, nothing else touching the window) stayed on its first scene for the whole run when started through my earlier `vc-play.py` and `vc-matrix2.py` harness. I could not find which detail of that harness causes it (bringing the window to the front does not, and a plain copy of the folder does not). Results taken with that harness that are only about hangs should be treated as unreliable; the ones that were repeated with a direct launch are listed below.
+
+Confirmed with a direct launch:
+
+* EEPROM save (`BackupType = 3`): stuck on the first scene in 5 of 5 runs (79 s each). SRAM (`BackupType = 1`): the title screen at about 26 to 37 s and the game by about 62 s, in every run seen (with a fresh save and with the save of a previous run alike).
+* Keys that make the game stay on the first scene when present: `TimeIntDelay`, `AIUseTimer`, `BootPCChange = 0`, `PlayerNum` (any value, including the default 4), `SIDelay` (any value, including 0, in `[RomOption]`; in `[RSPG]` it does nothing), `MemPak = 1`, `NoCntPak = 1` and removing `TrueBoot`. `TrueBoot = 1` is required. No effect on the result: `RetraceByVsync = 0` with `UseTimer = 1`, removing `[Input]` `StickModify`, `Rumble` on or off.
+* The Banjo-Tooie profile is therefore close to the only working set of keys, which matches the community recipe.
+
+**NO CONTROLLER.** None of the variants above removes it. The game's controller command block (the libultra PIF RAM at 0x8008B48C: four `FF 01 04 01` read commands followed by `FE`) is identical in RDRAM dumps taken with no key and with 15 different keys held, and its data bytes stay zero: the emulated SI never writes a controller response into the game's memory, which fits the game deciding on a timeout that there is no controller. The same keys do reach other titles (F-Zero X). The dark translucent box seen behind the characters is drawn behind the NO CONTROLLER text (it moves with it), and none of ten `[Render]` options changes it, so it most likely goes away with the controller problem.
+
+Framing: the first scene shows a thin black bar on the right and the title and cutscenes a wider band at the top than at the bottom; neither was changed by `ClipRight = 55` alone, and `ClipTop` and `ClipBottom` have still not been measured on a title or cutscene frame.

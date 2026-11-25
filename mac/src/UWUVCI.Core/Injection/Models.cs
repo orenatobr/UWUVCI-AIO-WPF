@@ -30,6 +30,8 @@ public sealed record N64Options
     public string? CustomIniPath { get; init; }
     /// <summary>Force the Expansion Pak on (true), off (false) or follow the game profile (null).</summary>
     public bool? ExpansionPak { get; init; }
+    /// <summary>Force the save hardware (the Cemu freeze of EEPROM titles can be avoided with SRAM or Flash), null follows the game profile.</summary>
+    public UWUVCI.Core.N64.BackupType? SaveType { get; init; }
     /// <summary>Stretch the game picture to 16:9 in the frame layout.</summary>
     public bool WideScreen { get; init; }
     /// <summary>Remove the darkening overlay of the VC frame.</summary>

@@ -19,7 +19,8 @@ public static class N64Profiles
     /// <param name="game">Database entry, or null for an unknown ROM.</param>
     /// <param name="header">Parsed ROM header.</param>
     /// <param name="pakOverride">Explicit Expansion Pak choice, null to follow the profile.</param>
-    public static VcIniOptions For(N64Game? game, RomHeader header, bool? pakOverride)
+    /// <param name="saveOverride">Explicit save hardware, null to follow the profile.</param>
+    public static VcIniOptions For(N64Game? game, RomHeader header, bool? pakOverride, BackupType? saveOverride = null)
     {
         string name = game?.Name ?? header.Title;
         var o = new VcIniOptions(CleanName(name), RegionLabel(name, header)) { BackupSize = "512" };
@@ -40,6 +41,8 @@ public static class N64Profiles
         }
 
         o = Tune(name, o);
+        if (saveOverride is { } save)
+            o = o with { BackupType = save, BackupSize = save == BackupType.Eeprom ? o.BackupSize ?? "512" : null };
         // No published ini sets RamSize, so the Expansion Pak stays off unless the user asks for it.
         return o with { ExpansionPak = pakOverride ?? false };
     }

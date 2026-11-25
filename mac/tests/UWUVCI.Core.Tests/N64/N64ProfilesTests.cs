@@ -11,6 +11,33 @@ public class N64ProfilesTests
     }
 
     [Fact]
+    public void SaveOverride_Sram_ReplacesTheProfileAndDropsTheSize()
+    {
+        var g = N64GameDatabase.Find(0x30C7AC50, 0x7704072D)!;   // Conker: EEPROM 16K by default
+        var o = N64Profiles.For(g, new RomHeader(0x30C7AC50, 0x7704072D, "T", "NCKE"), null, BackupType.Sram);
+        Assert.Equal(BackupType.Sram, o.BackupType);
+        Assert.Null(o.BackupSize);
+        Assert.True(o.RetraceByVsync);   // the rest of the profile is kept
+    }
+
+    [Fact]
+    public void SaveOverride_Eeprom_OnAFlashGame_GetsASize()
+    {
+        var g = N64GameDatabase.Find(0x8A6009B6, 0x94ACE150)!;   // Jet Force Gemini: Flash by default
+        var o = N64Profiles.For(g, new RomHeader(0x8A6009B6, 0x94ACE150, "T", "NJFE"), null, BackupType.Eeprom);
+        Assert.Equal(BackupType.Eeprom, o.BackupType);
+        Assert.Equal("512", o.BackupSize);
+    }
+
+    [Fact]
+    public void NoSaveOverride_FollowsTheProfile()
+    {
+        var g = N64GameDatabase.Find(0x30C7AC50, 0x7704072D)!;
+        var o = N64Profiles.For(g, new RomHeader(0x30C7AC50, 0x7704072D, "T", "NCKE"), null, null);
+        Assert.Equal(BackupType.Eeprom, o.BackupType);
+    }
+
+    [Fact]
     public void Conker_UsesEepromTimerVsync_PakOffByDefault()
     {
         var o = ProfileFor(0x30C7AC50, 0x7704072D);

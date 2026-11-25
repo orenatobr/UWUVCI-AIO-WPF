@@ -67,6 +67,27 @@
 
     <Border Classes="card">
       <StackPanel Spacing="8">
+        <TextBlock Text="Save hardware" Classes="section" />
+        <TextBlock Classes="muted"
+                   Text="Profile follows the game database and the published inis, which is what a Wii U needs. In Cemu, games that save to an EEPROM (Banjo-Tooie, for example) can stay on their first screen; SRAM or Flash lets them start, but their saves then are not EEPROM saves." />
+        <ListBox ItemsSource="{Binding Inject.SaveChoices}" SelectedItem="{Binding Inject.SaveChoice}"
+                 AutomationProperties.Name="Save hardware choice">
+          <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal" Spacing="8" />
+            </ItemsPanelTemplate>
+          </ListBox.ItemsPanel>
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:SaveChoice">
+              <TextBlock Text="{Binding}" MinWidth="56" TextAlignment="Center" />
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </StackPanel>
+    </Border>
+
+    <Border Classes="card">
+      <StackPanel Spacing="8">
         <TextBlock Text="Custom ini (optional)" Classes="section" />
         <TextBlock Classes="muted" Text="A hand written ini replaces the automatic profile. Text file, up to 16 MiB." />
         <StackPanel Orientation="Horizontal" Spacing="8">

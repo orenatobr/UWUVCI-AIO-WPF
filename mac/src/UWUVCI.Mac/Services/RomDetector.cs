@@ -28,10 +28,10 @@ public sealed class RomDetection
     public N64Game? Game => _game;
 
     /// <summary>Ini options for the given Expansion Pak choice (null follows the game profile).</summary>
-    public VcIniOptions Profile(bool? expansionPak) => N64Profiles.For(_game, _header, expansionPak);
+    public VcIniOptions Profile(bool? expansionPak, BackupType? save = null) => N64Profiles.For(_game, _header, expansionPak, save);
 
     /// <summary>The ini text that would be written for the given Expansion Pak choice.</summary>
-    public string BuildIni(bool? expansionPak) => VcIni.Build(Profile(expansionPak));
+    public string BuildIni(bool? expansionPak, BackupType? save = null) => VcIni.Build(Profile(expansionPak, save));
 }
 
 /// <summary>Reads an N64 ROM header and looks the game up.</summary>

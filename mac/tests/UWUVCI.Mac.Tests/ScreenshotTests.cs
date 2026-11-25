@@ -169,6 +169,15 @@ public class ScreenshotTests
     }, [Demo]);
 
     [Fact]
+    public Task OptionsVc_Light() => Render("15-options-vc-light", ThemeVariant.Light, (f, vm) =>
+    {
+        SelectN64(vm);
+        f.MakeValid();
+        f.Vm.SaveChoice = SaveChoice.Sram;
+        vm.Step = WizardStep.Options;
+    });
+
+    [Fact]
     public Task ConsoleIcons_HaveGeometryAndAccentInBothThemes() => Session.Value.Dispatch(() =>
     {
         var app = Application.Current!;

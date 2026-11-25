@@ -31,6 +31,21 @@ public enum PakChoice
     Off,
 }
 
+/// <summary>Save hardware choice: follow the game profile (what a Wii U needs) or force one, for example SRAM to test in Cemu.</summary>
+public enum SaveChoice
+{
+    /// <summary>Follow the game profile.</summary>
+    Profile,
+    /// <summary>Let the emulator decide.</summary>
+    Automatic,
+    /// <summary>Battery backed SRAM.</summary>
+    Sram,
+    /// <summary>Flash RAM.</summary>
+    Flash,
+    /// <summary>Serial EEPROM.</summary>
+    Eeprom,
+}
+
 /// <summary>Which emulator runs the game on the Wii U.</summary>
 public enum InjectEngine
 {
@@ -110,6 +125,13 @@ public sealed partial class InjectViewModel : ObservableObject
     /// <summary>Choices for the Expansion Pak control.</summary>
     public PakChoice[] PakChoices { get; } = Enum.GetValues<PakChoice>();
 
+    /// <summary>Save hardware choice.</summary>
+    [ObservableProperty]
+    private SaveChoice _saveChoice;
+
+    /// <summary>Choices for the save hardware control.</summary>
+    public SaveChoice[] SaveChoices { get; } = Enum.GetValues<SaveChoice>();
+
     /// <summary>The detected ROM, or null.</summary>
     public RomDetection? Detection => _detection;
 
@@ -154,7 +176,7 @@ public sealed partial class InjectViewModel : ObservableObject
         get
         {
             if (_detection is null) return "";
-            var p = _detection.Profile(PakValue);
+            var p = _detection.Profile(PakValue, SaveValue);
             return p.Rumble ? "Rumble Pak" : p.MemPack ? "Controller Pak" : "None";
         }
     }
@@ -162,12 +184,21 @@ public sealed partial class InjectViewModel : ObservableObject
     /// <summary>Whether the ini enables the Expansion Pak.</summary>
     public string RomExpansionPak => _detection is null ? ""
         : _customIniText is not null ? "Defined by your ini"
-        : _detection.Profile(PakValue).ExpansionPak ? "Enabled (experimental)" : "Not enabled";
+        : _detection.Profile(PakValue, SaveValue).ExpansionPak ? "Enabled (experimental)" : "Not enabled";
 
     /// <summary>The ini that will be written, read only.</summary>
-    public string IniPreview => _customIniText ?? _detection?.BuildIni(PakValue) ?? "";
+    public string IniPreview => _customIniText ?? _detection?.BuildIni(PakValue, SaveValue) ?? "";
 
     private bool? PakValue => PakChoice switch { PakChoice.On => true, PakChoice.Off => false, _ => null };
+
+    private UWUVCI.Core.N64.BackupType? SaveValue => SaveChoice switch
+    {
+        SaveChoice.Automatic => UWUVCI.Core.N64.BackupType.Auto,
+        SaveChoice.Sram => UWUVCI.Core.N64.BackupType.Sram,
+        SaveChoice.Flash => UWUVCI.Core.N64.BackupType.Flash,
+        SaveChoice.Eeprom => UWUVCI.Core.N64.BackupType.Eeprom,
+        _ => null,
+    };
 
     /// <summary>Detects an N64 ROM and fills the detection card.</summary>
     public void SetRom(string? path)
@@ -178,6 +209,8 @@ public sealed partial class InjectViewModel : ObservableObject
     }
 
     partial void OnPakChoiceChanged(PakChoice value) => Revalidate();
+
+    partial void OnSaveChoiceChanged(SaveChoice value) => Revalidate();
 
     // ---- Engine ----
 
@@ -616,6 +649,7 @@ public sealed partial class InjectViewModel : ObservableObject
         WideScreen = false;
         DarkFilter = false;
         PakChoice = PakChoice.Auto;
+        SaveChoice = SaveChoice.Profile;
         SetCustomIni(null);
         ResultPath = null;
         ResultSdPath = null;
@@ -633,6 +667,7 @@ public sealed partial class InjectViewModel : ObservableObject
         {
             CustomIniPath = CustomIniPath,
             ExpansionPak = PakValue,
+            SaveType = SaveValue,
             WideScreen = WideScreen,
             DarkFilter = DarkFilter,
         },

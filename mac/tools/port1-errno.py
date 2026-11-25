@@ -24,6 +24,8 @@ def run(name,src,edit):
     print(name,res[:3],flush=True)
 src=W+'/vc-titles/ab-43/base'
 V={'base':lambda t:t,
+   'alwayshave':lambda t:re.sub(r'StickModify\s*=\s*2','StickModify = 2\nAlwaysHave = 1',t),
    'norumble':lambda t:re.sub(r'Rumble\s*=\s*1','Rumble = 0',t),
-   'rumble0nopak':lambda t:re.sub(r'Rumble\s*=\s*1','Rumble = 0',t)}
+   'delrumble':lambda t:re.sub(r'Rumble\s*=\s*1\n','',t),
+   'tpak':lambda t:re.sub(r'Rumble\s*=\s*1','Rumble = 0\nTPak = 1',t)}
 for n in sys.argv[1:]: run(n,src,V[n])

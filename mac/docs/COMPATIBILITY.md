@@ -165,3 +165,5 @@ Observed while testing: after a fresh start Banjo-Tooie spends a while on its fi
 * Looking for the pad structure in the RDRAM (the A button bit 0x8000 while J was held) only found pointer lists, so the structure was not located.
 
 Next steps: try the Wii U Pro Controller type in Cemu instead of the GamePad (the VC has separate handling for the GamePad, Classic and Pro types), and launch the title under `lldb` from the start to read the SI state in the first scene.
+
+Update: the same input test with the emulated controller set to the Wii U Pro Controller type instead of the GamePad gives the same result (NO CONTROLLER in every frame, START and the other keys ignored, the intro plays by itself), so the controller type is not the cause either. Not tried yet: launching the title under `lldb` from the start to read the SI state in the first scene, and checking the Banjo-Tooie ini on a real Wii U, where the community table reports the game working.

@@ -115,3 +115,14 @@ What would continue this work: a way to see the N64 RDRAM and program counter of
 The full list of ini keys the engine reads, and what was tried with the graphics task keys, is in `VC_INI_KEYS.md`.
 
 A scan of 1.3 GB of readable guest memory for the code the engine's JIT emits to reach the N64 RAM (`lis r27,0x1337; ori r27,r27,0x2760`) found no match in 29 minutes, so that route to the RDRAM base is also closed with the stub alone.
+
+## Reading the emulated N64 with lldb (2026-11-25)
+
+The macOS Developer Tools approval was given, so `lldb` can attach to the Cemu copy. `tools/lldump.py` dumps the guest memory (about 1.4 GB, 80 s) and `tools/n64-state.py` reads the emulated N64 out of the dump. What this showed for Banjo-Tooie (F-Zero X base, hung on the first scene):
+
+* **Where the RDRAM is.** The engine global at guest 0x10054490 holds the host pointer of the N64 RDRAM (0xF546A014 in that run, inside the 0xF4000000 pool that the GDB stub could not read) and 0x100541a4 holds its size, 8 MB. N64 address 0x80000000+X is RDRAM byte X.
+* **The N64 CPU is idle.** Its registers (guest 0x132E6CD0) show it inside libultra's boot thread idle loop (`b .` at 0x80013620). Eleven libultra threads exist; all but the idle one are WAITING in `osRecvMesg` (saved PC 0x8002d778) with empty message queues.
+* **Graphics and audio keep running.** The pending graphics task uses microcode F3DEX2 2.08 (string `RSP Gfx ucode F3DEX.NoN fifo 2.08`) with ordinary F3DEX2 opcodes, and its fields change between two dumps, so the scheduler is alive and the picture keeps being redrawn.
+* **Who waits for what.** The game logic thread (id 2, priority 35) runs a frame and then blocks on queue 0x80080e30, which is signaled by the video thread (id 6, priority 127) through the helper at 0x80013450, only when the flag at 0x80042ab0 is 1 (it is 1). The video thread is blocked at 0x80015178 inside its frame pacing loop, waiting for a vertical retrace message on queue 0x80083470, which stays empty. The event table (0x8008a1f0) routes COUNTER and VI to the VI manager queue 0x8008b420, SP and DP to the scheduler queue 0x80082800, and SI to the queue 0x80083f70.
+
+So Banjo-Tooie is not spinning and not stuck in the graphics path: it is waiting for vertical retrace messages that are not forwarded to its queue. Candidate causes to test next: the VI manager not forwarding retrace messages because of the video mode it was given, or the retrace delivery of the engine (`RetraceByVsync`, `UseTimer`, `TicksPerFrame`) not matching what this game sets up. This is a diagnosis, not a fix.

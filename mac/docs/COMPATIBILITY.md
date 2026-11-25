@@ -243,3 +243,21 @@ Variants tested with `tools/port1-errno.py` (direct launch, one full RDRAM dump 
 * How to read the entry (hypothesis, not yet checked against a second dump): in libultra `type` and `status` are only written when the port answers, and `errno` is taken from the answer's error bits (`0x08` means no response). So the `00 05 01` in port 1's entry is probably left over from an earlier query that worked, and the `0x08` comes from a later one. Banjo-Tooie repeats the query while NO CONTROLLER is shown; F-Zero X does not need to. To check: dump twice, early (before the NO CONTROLLER text) and late, and see whether the `errno` of port 1 changes from 0 to 8.
 * GoldenEye 007 and Turok cannot be tried on this machine: the ROMs are not here (only Banjo-Tooie, Conker, Jet Force Gemini, Banjo-Kazooie, Majora's Mask and Pokemon Stadium 2 were found).
 * Early and late dump (`tools/port1-early-late.py`, same title, dumps about 60 s and 85 s after launch): both show `00 05 01 08` for port 1. The hypothesis above is not confirmed or refuted: the status was already `errno 0x08` before the first dump, and lldb cannot attach earlier than about 45 to 60 s. Seeing the change from 0 to 8 would need a dump from the first seconds (for example a Cemu debugger breakpoint, or a graphic pack patch that logs the write).
+
+## The engine's PIF command processor, and two refuted ideas for port 1 (2026-11-25)
+
+Found from the string `Received empty PIF message.` (VESSEL.rpx, guest addresses; the 64 byte PIF RAM image is at `0x133002AC`):
+
+* `0x2060F3C`: processes the PIF RAM. It walks the channels, and for each command dispatches on the command byte (a jump table for 0 to 7, and 0xFF for reset). The info command (0) for channel 4 answers as the EEPROM (`0x8000`, plus `0x4000` when the backup size is 2048); for channels 0 to 3 it calls `0x2060D90`.
+* `0x2060D90`: for each controller channel, if the flag at `0x10054404` is 0 and the first word of the per port record at `0x100C097C + port * 0x58` (the Virtual Console controller state, set through `VC_setControllerInfo`) is 0, it sets bit `0x80` in the channel's receive size byte, which libultra reads as `errno 0x08` (no response). Otherwise it answers type 5 and a status byte from the `Rumble`, `MemPak` and `TPak` settings.
+* `0x2061050` to `0x2061074`: a check that only runs for ROM ids starting with `NB7` (Banjo-Tooie): if the command's first byte has bit 7 or 6 set, the engine returns without processing it.
+* The flag at `0x10054404` is the ini key `[Input] AlwaysHave`.
+
+Two ideas tested and refuted, each with a direct launch, a full RDRAM dump after 68 s and the F-Zero X engine data as the reference:
+
+* Connected state: in the engine data dumps both Banjo-Tooie and F-Zero X have the flag `AlwaysHave` = 1 and the per port records `[1, 0, 0, 0]`, so the connected check is the same in both games. A title with `AlwaysHave = 1` written in its ini gives the same array as before (`00 05 01 08` for port 1).
+* The `NB7` check: a Cemu graphic pack that replaced the branch at `0x2061074` with a nop (applied, confirmed in the log) leaves port 1 at `errno 0x08`.
+
+Also refuted: the counters that differ in the engine data (`0x13372440` to `0x13372540`) are instruction counts of the CPU recompiler's floating point handlers, not controller state.
+
+What is still open: why port 1's receive size byte ends with the no response bit while ports 2 to 4 do not. The remaining places to look are the other commands the game sends to channel 0 (read buttons, `0x2061364` onward) and the code that writes the receive size byte back to the game's PIF buffer.

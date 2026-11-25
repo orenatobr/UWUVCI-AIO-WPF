@@ -7,10 +7,10 @@ public static class Cli
     private const string Usage = """
         uwuvci-cli detect <rom>
             Show the detected game and the VC ini that would be written.
-        uwuvci-cli vc-layout <rom> <base-dir> <name> <out-dir> [--pak on|off]
+        uwuvci-cli vc-layout <rom> <base-dir> <name> <out-dir> [--pak on|off] [--widescreen] [--no-dark-filter]
             Inject the ROM into a copy of an official N64 base (a decrypted folder with code, content, meta),
             unencrypted, in <out-dir>/base. Run <out-dir>/base/code/*.rpx in Cemu to test it. The base is not changed.
-        uwuvci-cli vc-pack <rom> <base-dir> <name> <out-dir> --key <32 hex> [--pak on|off]
+        uwuvci-cli vc-pack <rom> <base-dir> <name> <out-dir> --key <32 hex> [--pak on|off] [--widescreen] [--no-dark-filter]
             Same, then encrypt into an installable title with your Wii U common key.
         uwuvci-cli base-download <title-id> <dest-dir>
             Download and decrypt a base from the Nintendo CDN into <dest-dir>. The keys come from the environment so
@@ -86,7 +86,10 @@ public static class Cli
     private static int Vc(string rom, string baseDir, string name, string outDir, string[] rest, bool pack, TextWriter output)
     {
         bool? pak = Option(rest, "--pak") switch { "on" => true, "off" => false, null => null, var v => throw new ArgumentException($"--pak must be on or off, not '{v}'.") };
-        var req = new InjectRequest(GameConsole.N64, rom, baseDir, name) { N64 = new N64Options { ExpansionPak = pak } };
+        var req = new InjectRequest(GameConsole.N64, rom, baseDir, name)
+        {
+            N64 = new N64Options { ExpansionPak = pak, WideScreen = rest.Contains("--widescreen"), DarkFilter = rest.Contains("--no-dark-filter") }
+        };
         Directory.CreateDirectory(outDir);
         if (pack)
         {

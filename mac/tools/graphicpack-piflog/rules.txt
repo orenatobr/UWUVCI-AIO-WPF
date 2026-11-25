@@ -1,0 +1,6 @@
+[Definition]
+titleIds = 000500024C8E9680
+name = UWUVCI pif log
+path = "UWUVCI/pif log"
+description = Log PIF commands
+version = 7

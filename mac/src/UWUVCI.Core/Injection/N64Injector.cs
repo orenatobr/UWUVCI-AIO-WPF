@@ -14,6 +14,17 @@ public static class N64Injector
         var z64 = N64Rom.ToZ64(raw);
         var header = N64Rom.ReadHeader(z64);
 
+        var game = N64GameDatabase.Find(header.Crc1, header.Crc2);
+
+        // Prepare the engine patch in memory too, so an engine that cannot take it fails before anything is written.
+        string? enginePath = null; byte[]? engine = null;
+        if (N64Profiles.NeedsEeprom16KAnswer(game, header))
+        {
+            enginePath = Directory.Exists(Path.Combine(baseDir, "code")) ? Directory.GetFiles(Path.Combine(baseDir, "code"), "*.rpx").FirstOrDefault() : null;
+            if (enginePath is null) throw new InvalidDataException("The base has no VC engine (.rpx) in code.");
+            engine = VcEnginePatches.AnswerEeprom16K(File.ReadAllBytes(enginePath));
+        }
+
         var romDir = Path.Combine(baseDir, "content", "rom");
         var slots = Directory.Exists(romDir) ? Directory.GetFiles(romDir) : [];
         if (slots.Length == 0)
@@ -31,9 +42,10 @@ public static class N64Injector
         }
         else
         {
-            var game = N64GameDatabase.Find(header.Crc1, header.Crc2);
             File.WriteAllText(iniPath, VcIni.Build(N64Profiles.For(game, header, options.ExpansionPak, options.SaveType)));
         }
+
+        if (engine is not null) File.WriteAllBytes(enginePath!, engine);
 
         if (options.WideScreen || options.DarkFilter)
         {

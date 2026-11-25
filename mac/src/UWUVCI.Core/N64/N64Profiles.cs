@@ -53,8 +53,9 @@ public static class N64Profiles
 
     private static VcIniOptions Tune(string name, VcIniOptions o)
     {
-        if (name.StartsWith("Banjo-Tooie", StringComparison.OrdinalIgnoreCase))
-            return o with { RetraceByVsync = true, TrueBoot = true, ExtraSections = o.Region == "EU" ? BanjoInput + BanjoEuRender : BanjoInput };
+        if (IsBanjoTooie(name))
+            // SRAM: with the EEPROM save the first scene never advances in Cemu. The EEPROM size answer is fixed in the engine (VcEnginePatches).
+            return o with { BackupType = BackupType.Sram, BackupSize = null, RetraceByVsync = true, TrueBoot = true, ExtraSections = o.Region == "EU" ? BanjoInput + BanjoEuRender : BanjoInput };
         if (name.StartsWith("Conker's Bad Fur Day", StringComparison.OrdinalIgnoreCase))
             return o with { RetraceByVsync = true, UseTimer = true };
         if (name.StartsWith("Jet Force Gemini", StringComparison.OrdinalIgnoreCase))
@@ -63,6 +64,11 @@ public static class N64Profiles
             return o with { UseTimer = true, ExtraSections = name.Contains("(J)") ? GoldenEyeJp : null };
         return o;
     }
+
+    /// <summary>True for Banjo-Tooie, which needs the engine to answer a 16 Kbit EEPROM (see <c>VcEnginePatches</c>).</summary>
+    public static bool NeedsEeprom16KAnswer(N64Game? game, RomHeader header) => IsBanjoTooie(game?.Name ?? header.Title);
+
+    private static bool IsBanjoTooie(string name) => name.StartsWith("Banjo-Tooie", StringComparison.OrdinalIgnoreCase);
 
     private static string CleanName(string name) =>
         name.Replace('\r', ' ').Replace('\n', ' ').Trim();

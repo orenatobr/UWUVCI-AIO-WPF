@@ -15,10 +15,73 @@ public class N64InjectorTests
         return rom;
     }
 
+    // li r11,0x4000 / cmpwi r12,0x800 / stb r7,1(r26) / beq +8 / li r11,0 / ori r10,r11,0x8000: how the engine answers the EEPROM size query
+    private static readonly uint[] EepromAnswer = [0x39604000, 0x2C0C0800, 0x98FA0001, 0x41820008, 0x39600000, 0x616A8000];
+
+    internal static string WriteEngine(TestBase b, bool withSequence = true)
+    {
+        var code = SyntheticRpx.Code();
+        if (withSequence)
+            for (int i = 0; i < EepromAnswer.Length; i++)
+                System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(code.AsSpan((300 + i) * 4), EepromAnswer[i]);
+        var path = Path.Combine(b.Root.FullName, "code", "VESSEL.rpx");
+        File.WriteAllBytes(path, SyntheticRpx.Build(code));
+        return path;
+    }
+
+    private static string RomFile(TestBase b, byte[] z64)
+    {
+        var f = Path.Combine(b.Root.FullName, "game.z64");
+        File.WriteAllBytes(f, z64);
+        return f;
+    }
+
+    [Fact]
+    public void Inject_BanjoTooie_MakesTheEngineAnswerA16KbitEeprom()
+    {
+        using var b = new TestBase();
+        var rpx = WriteEngine(b);
+        N64Injector.Inject(b.Root.FullName, RomFile(b, Z64()), new N64Options());
+        var code = SyntheticRpx.Read(File.ReadAllBytes(rpx)).Code;
+        Assert.Equal(0x60000000u, System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(code.AsSpan((300 + 4) * 4)));   // li r11,0 became a nop
+    }
+
+    [Fact]
+    public void Inject_BanjoTooie_PatchesAlsoWhenEepromIsChosen()
+    {
+        using var b = new TestBase();
+        var rpx = WriteEngine(b);
+        N64Injector.Inject(b.Root.FullName, RomFile(b, Z64()), new N64Options { SaveType = BackupType.Eeprom });
+        var code = SyntheticRpx.Read(File.ReadAllBytes(rpx)).Code;
+        Assert.Equal(0x60000000u, System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(code.AsSpan((300 + 4) * 4)));
+    }
+
+    [Fact]
+    public void Inject_OtherGames_LeaveTheEngineAlone()
+    {
+        using var b = new TestBase();
+        var rpx = WriteEngine(b);
+        var before = File.ReadAllBytes(rpx);
+        N64Injector.Inject(b.Root.FullName, RomFile(b, Z64("SOME OTHER GAME", 0x11111111, 0x22222222)), new N64Options());
+        Assert.Equal(before, File.ReadAllBytes(rpx));
+    }
+
+    [Fact]
+    public void Inject_BanjoTooie_OnAnEngineWithoutTheSequence_FailsBeforeTouchingTheBase()
+    {
+        using var b = new TestBase();
+        WriteEngine(b, withSequence: false);
+        var romBefore = File.ReadAllBytes(Path.Combine(b.Content, "rom", "NAAE.z64"));
+        var ex = Assert.Throws<InvalidDataException>(() => N64Injector.Inject(b.Root.FullName, RomFile(b, Z64()), new N64Options()));
+        Assert.Contains("engine", ex.Message);
+        Assert.Equal(romBefore, File.ReadAllBytes(Path.Combine(b.Content, "rom", "NAAE.z64")));
+    }
+
     [Fact]
     public void Inject_ReplacesRomAndWritesIniNamedAfterBaseRom()
     {
         using var b = new TestBase();
+        WriteEngine(b);
         var romFile = Path.Combine(b.Root.FullName, "game.v64");
         var z = Z64();
         var v = (byte[])z.Clone();
@@ -31,8 +94,8 @@ public class N64InjectorTests
         var ini = File.ReadAllText(Path.Combine(b.Content, "config", "NAAE.z64.ini"));
         Assert.StartsWith(";", ini);
         Assert.Contains("[RomOption]", ini);
-        Assert.Contains("BackupType = 3", ini);   // Banjo-Tooie: EEPROM
-        Assert.Contains("BackupSize = 2048", ini);
+        Assert.Contains("BackupType = 1", ini);   // Banjo-Tooie: SRAM, the only save type that boots in Cemu (EEPROM stays on the first scene)
+        Assert.DoesNotContain("BackupSize", ini);
         Assert.Contains("TrueBoot = 1", ini);      // community ini for NB7E
         Assert.Contains("StickModify = 2", ini);
         Assert.DoesNotContain("RamSize", ini);     // works with the default RAM, do not experiment
@@ -43,6 +106,7 @@ public class N64InjectorTests
     public void Inject_CustomIniOverridesAutomaticProfile()
     {
         using var b = new TestBase();
+        WriteEngine(b);                     // the test ROM is Banjo-Tooie, whose engine patch applies with a custom ini too
         var romFile = Path.Combine(b.Root.FullName, "game.z64");
         File.WriteAllBytes(romFile, Z64());
         var custom = Path.Combine(b.Root.FullName, "mine.ini");
@@ -116,6 +180,7 @@ public class N64InjectorTargetGameTests
     private static string InjectAndReadIni(uint c1, uint c2)
     {
         using var b = new TestBase();
+        N64InjectorTests.WriteEngine(b);     // Banjo-Tooie also gets its engine patched
         var romFile = Path.Combine(b.Root.FullName, "g.z64");
         File.WriteAllBytes(romFile, Rom(c1, c2));
         N64Injector.Inject(b.Root.FullName, romFile, new N64Options());
@@ -125,7 +190,7 @@ public class N64InjectorTargetGameTests
     [Theory]
     [InlineData(0x30C7AC50u, 0x7704072Du, "Conker", "BackupType = 3")]
     [InlineData(0x8A6009B6u, 0x94ACE150u, "Jet Force Gemini", "BackupType = 2")]
-    [InlineData(0xC2E9AA9Au, 0x475D70AAu, "Banjo-Tooie", "BackupType = 3")]
+    [InlineData(0xC2E9AA9Au, 0x475D70AAu, "Banjo-Tooie", "BackupType = 1")]
     [InlineData(0xDCBC50D1u, 0x09FD1AA3u, "GoldenEye", "BackupSize = 512")]
     [InlineData(0x2F70F10Du, 0x5C4187FFu, "Turok - Dinosaur Hunter", "MemPack = 1")]
     [InlineData(0x49088A11u, 0x6494957Eu, "Turok 2", "MemPack = 1")]

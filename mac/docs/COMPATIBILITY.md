@@ -150,3 +150,9 @@ With the save deleted before each variant, `BackupType = 1` (SRAM) and `BackupTy
 * `vc-layout` and `vc-pack` take `--save-type auto|sram|flash|eeprom`, and the Options page has a Save hardware choice (Profile, Automatic, SRAM, Flash, EEPROM). Profile follows the game database. Use SRAM to test in Cemu.
 * Verified end to end in Cemu: `vc-layout ... --save-type sram --widescreen --no-dark-filter` on the F-Zero X base gives a title that reaches the title screen and gameplay, with the picture filling 95% of the window width.
 * Conker (EEPROM 16K) and Jet Force Gemini (Flash) have not been retried with this finding yet.
+
+## Banjo-Tooie (EU): the picture was drawn 5% short of the frame (2026-11-25)
+
+With the widescreen patch the picture stopped at 95% of the window width, with a black bar on the right (the same 5% shortfall exists in the 4:3 mode, where the picture is also pushed to the left). Adding `[Render]` `ClipRight = 55` to the ini, the value the community uses to centre Banjo-Kazooie, made the picture fill 100% of the width in Cemu (28 gave 99%, the Banjo-Kazooie set of four clip values did nothing). The profile of Banjo-Tooie (Europe) now writes it. The US version was not measured and does not get it.
+
+Observed while testing: after a fresh start Banjo-Tooie spends a while on its first scene before the title screen (up to a few minutes, longer when other Cemu windows run at the same time), and then plays. The game prints NO CONTROLLER because the Cemu keyboard profile maps no analog stick, no ZL or ZR and no HOME; a controller profile is the next step.

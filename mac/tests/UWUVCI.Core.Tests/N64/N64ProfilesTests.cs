@@ -38,6 +38,21 @@ public class N64ProfilesTests
     }
 
     [Fact]
+    public void BanjoTooieEu_ClipsTheRightEdgeSoThePictureFillsTheFrame()
+    {
+        var o = N64Profiles.For(null, new RomHeader(1, 2, "Banjo-Tooie (E)", "NB7P"), null);
+        Assert.Contains("[Render]\nClipRight = 55", o.ExtraSections);
+        Assert.Contains("StickModify = 2", o.ExtraSections);   // the existing section is kept
+    }
+
+    [Fact]
+    public void BanjoTooieUs_DoesNotGetTheEuClip()
+    {
+        var o = N64Profiles.For(null, new RomHeader(1, 2, "Banjo-Tooie (U)", "NB7E"), null);
+        Assert.DoesNotContain("ClipRight", o.ExtraSections);
+    }
+
+    [Fact]
     public void Conker_UsesEepromTimerVsync_PakOffByDefault()
     {
         var o = ProfileFor(0x30C7AC50, 0x7704072D);

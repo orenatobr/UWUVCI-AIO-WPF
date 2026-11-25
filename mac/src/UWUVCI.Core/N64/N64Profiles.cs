@@ -11,6 +11,10 @@ public static class N64Profiles
 {
     private const string BanjoInput = "[Input]\nStickModify = 2\n";
 
+    // The PAL picture of the VC engine is drawn 5% short of the frame (a black bar on the right). The community
+    // fixes this for Banjo-Kazooie with ClipRight = 55, and the same value fills the frame exactly for Banjo-Tooie (EU).
+    private const string BanjoEuRender = "\n[Render]\nClipRight = 55\n";
+
     private const string GoldenEyeJp =
         "[BreakBlockInst]\nCount = 1\nAddress0 = 0x7f0d0eeC\nInst0 = 0x24420004\nJmpPC0= 0x7f0d0ee8\nType0 = 1\n\n" +
         "[Render]\nFogVertexAlpha = 0\n";
@@ -50,7 +54,7 @@ public static class N64Profiles
     private static VcIniOptions Tune(string name, VcIniOptions o)
     {
         if (name.StartsWith("Banjo-Tooie", StringComparison.OrdinalIgnoreCase))
-            return o with { RetraceByVsync = true, TrueBoot = true, ExtraSections = BanjoInput };
+            return o with { RetraceByVsync = true, TrueBoot = true, ExtraSections = o.Region == "EU" ? BanjoInput + BanjoEuRender : BanjoInput };
         if (name.StartsWith("Conker's Bad Fur Day", StringComparison.OrdinalIgnoreCase))
             return o with { RetraceByVsync = true, UseTimer = true };
         if (name.StartsWith("Jet Force Gemini", StringComparison.OrdinalIgnoreCase))

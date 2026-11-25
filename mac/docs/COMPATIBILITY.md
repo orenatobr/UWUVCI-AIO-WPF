@@ -223,3 +223,16 @@ The saved N64 CPU register block in the controller dumps (`ctrl/idle.bin`, read 
 ## Retraction: the PIF command block does not explain NO CONTROLLER (2026-11-25)
 
 Full 8 MB RDRAM dumps, taken once with lldb after 68 s, of F-Zero X (reacts to input) and Banjo-Tooie (NO CONTROLLER): both hold four `FF 01 04 01` read commands followed by `FE` with all data bytes zero (F-Zero X at `0x800F9C50`, Banjo-Tooie at `0x8008B490`). The earlier reading of that block as a missing SI response was wrong. What differs between the two games is still unknown; the next comparison is the pad status the game keeps after its read (the `OSContPad` array and `osContStartQuery` result), found by following the pointer the game passes to `osContGetReadData` in each dump.
+
+## NO CONTROLLER: port 1 answers with CONT_NO_RESPONSE_ERROR (2026-11-25, full RDRAM dumps)
+
+Searching both full dumps for the libultra `OSContStatus` array (4 entries of `type u16, status u8, errno u8`, written by `osContStartQuery`) separates the two games:
+
+| Game | Array | Entries |
+| --- | --- | --- |
+| F-Zero X (reacts to input) | `0x800DCE70` | `00 05 01 00` four times: all four ports normal controllers, `errno 0` |
+| Banjo-Tooie (NO CONTROLLER) | `0x80083FA0` | `00 05 01 08`, then `00 05 01 00` three times: port 1 has `errno 0x08`, ports 2 to 4 are fine |
+
+`0x08` is `CONT_NO_RESPONSE_ERROR` in `os_cont.h`. So the game's own query result says that player 1 gave no response while the other three ports did, which is exactly what the NO CONTROLLER screen reports. The cause is therefore in what the engine's emulated PIF returns for port 1 in the query for this game (the zero PIF command block is the same in both games and is not the difference). Next: find which engine setting changes the status of port 1 alone (the pak selection at `0x204b280`, the device initialisation in `trlEmuShellInputInitDevice`, or the per game ini), and check the array after a variant that boots, one at a time with the dump.
+
+Variants tested with `tools/port1-errno.py` (direct launch, one full RDRAM dump after 68 s each, F-Zero X is the working reference): the base SRAM Banjo-Tooie title and the same title with `Rumble = 0` give the identical array at `0x80083FA0` (`00 05 01 08` for port 1, ports 2 to 4 normal), so the rumble pak setting does not change the status of port 1. The variants that hang the first scene (`MemPak`, `NoCntPak`, `PlayerNum`, `SIDelay`, `TimeIntDelay`) cannot be read this way because the game never reaches the query. The Apple Silicon work (the port to Avalonia and .NET 10 arm64, the wizard UI built with the /ui-guidelines checks, the `--widescreen`, `--save-type` and EU clip options) is already in main since v1.4.1; this round shipped no new code.

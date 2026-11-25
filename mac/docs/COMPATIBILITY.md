@@ -205,3 +205,17 @@ Found by scanning the code dump for the loads of the `undefined microcode` and `
 * **JFG microcode type test (does not work).** A Cemu graphic pack patch (`moduleMatches = 0xC0C21308`, `0x0206A314 = li r0, 9`, the default type written at `+0x203c` for unknown microcode) was applied (the log confirms the group) and changed nothing: still about 180,000 `undefined microcode` lines and the same dark scene. The field that selects the parser is probably `+0x2044` (the 5 and 7 families set by the checksum chain), not `+0x203c`. Do not repeat this patch; the next try is to change what the chain stores in `+0x2044`.
 * **Discarded: every result taken with `vc-play.py` and `vc-matrix2.py`** (the old test harness). Launched through it, the same Banjo-Tooie title stayed on its first scene while a direct launch reached the title in about 30 s. Only the results repeated with `tools/repeat-launch.py` and `tools/ini-variants.py` are kept; they are in the section "Reliable testing" above.
 * **Banjo-Tooie is not at 100% in Cemu.** Open: NO CONTROLLER and no input, the vertical band (12.5% top, 1.2% bottom, not changed by `ClipTop` or `ClipBottom`), and the dark box behind the NO CONTROLLER text. The community table lists the game as working on a real Wii U, so the controller failure may be specific to Cemu's handling of this engine; it has not been tested on hardware.
+
+## Vertical bands are not specific to Banjo-Tooie (2026-11-25, direct launch)
+
+The F-Zero X base (a working game, launched directly in Cemu for 60 s, no input) shows the same uneven bands as Banjo-Tooie on its title screen and a balanced picture in the race:
+
+| Scene | Top band | Bottom band | Window body |
+| --- | --- | --- | --- |
+| F-Zero X title (twice, 17 s and 57 s) | 173 px | 47 px | 1,422 px |
+| F-Zero X race (30 s and 43 s) | 76 px | 95 px | 1,422 px |
+| Banjo-Tooie title | 178 px | 17 px | about 1,420 px |
+
+So the offset follows the scene (the picture's own vertical position in the frame), not this game's ini: `ClipTop` and `ClipBottom` leave it unchanged, and a game that is known to work has it too. Treat it as an engine and frame layout effect to compare on a real Wii U, not as a Banjo-Tooie defect.
+
+The saved N64 CPU register block in the controller dumps (`ctrl/idle.bin`, read at engine address `0x132E6CD0`) is all zeros, so those dumps do not show where the game's CPU is waiting; the dump script's register address or layout is wrong.

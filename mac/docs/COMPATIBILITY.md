@@ -261,3 +261,15 @@ Two ideas tested and refuted, each with a direct launch, a full RDRAM dump after
 Also refuted: the counters that differ in the engine data (`0x13372440` to `0x13372540`) are instruction counts of the CPU recompiler's floating point handlers, not controller state.
 
 What is still open: why port 1's receive size byte ends with the no response bit while ports 2 to 4 do not. The remaining places to look are the other commands the game sends to channel 0 (read buttons, `0x2061364` onward) and the code that writes the receive size byte back to the game's PIF buffer.
+
+## PIF traffic log: the engine answers every port correctly (2026-11-25)
+
+A Cemu graphic pack (`tools/graphicpack-piflog`) patches the engine's PIF processor to print each command and, at the common exit (`0x20616B0`), the processed PIF image through the engine's own `printf` (`0xE05DB8`), which shows up as `[OSConsole]` lines in Cemu's `log.txt`. Technique notes: the patch must be a `patch_*.asm` file (a `.origin = codecave` in `patches.txt` is rejected), the Cemu assembler has no `mfcr` (hook where the condition register is recomputed right after, here `0x2061078`), and `titleIds` in `rules.txt` must be the title's id. The pack is for development only; it prints thousands of lines.
+
+Result for the Banjo-Tooie SRAM title, 72 s, 3,915 processed PIF images:
+
+* The first message is the controller query. All four channels answer `ff 01 03 00 05 00 01` (type 5, status 1) with no receive error bit. The EEPROM query answers `00 80` (4 Kbit). A second single channel query is answered the same way.
+* The game then probes the pak on all four ports (reads `tx 03 rx 21 cmd 02` and writes `tx 23 rx 01 cmd 03`); the reads return `80` fill bytes (a rumble pak), as set by `Rumble = 1`.
+* From then on the game reads the buttons every frame (3,530 times, `ff 01 04 01` on four channels, data bytes zero with no key held). None of the 3,915 images has a receive error bit (`0x80`, `0x40`) on any command.
+
+So the engine never reports "no response" to Banjo-Tooie, and the earlier work on the PIF processor, `AlwaysHave` and the `NB7` branch looked in the wrong place. The `errno 0x08` at `0x80083FA0` in the game's own RAM is not coming from a PIF error bit, and what that array is, and why the game shows NO CONTROLLER while all four ports answer, is open. Next: find what the game does with the query result (follow the reads of `0x80083FA0` in the game's code) and compare the same pak probe in F-Zero X, which does not probe paks at all.

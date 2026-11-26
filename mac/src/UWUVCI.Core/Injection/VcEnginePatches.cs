@@ -11,6 +11,15 @@ public static class VcEnginePatches
     private const int LiR11Zero = 4;
     private const uint Nop = 0x60000000;
 
+    // Where the engine stores the mask of textures a draw samples, which the pixel shader reads as uf_remappedPS[0].z (bit 0
+    // TEXEL0, bit 1 TEXEL1; below 1 it skips the first texture, below 2 the second). The mask comes from the combiner color
+    // inputs it scans, and it is 0 for many draws that need a texture (Banjo-Tooie HUD digits and dust puffs came out
+    // missing). The two places that copy it into the uniform are: lwz r10,0(r26) / stw r10,0xc8(r26) and
+    // lwz r10,0(r26) / stfs f1,0xe8(r26) / stw r10,0xc8(r26). Both are changed to li r10,3.
+    private static readonly uint[] MaskStoreA = [0x815A0000, 0x915A00C8];
+    private static readonly uint[] MaskStoreB = [0x815A0000, 0xD03A00E8, 0x915A00C8];
+    private const uint LiR10Three = 0x39400003;
+
     /// <summary>
     /// Returns the engine with the EEPROM size answer fixed at 16 Kbit. Banjo-Tooie asks <c>osEepromProbe</c> and, when it
     /// is not told 16 Kbit, stores an error that makes it show NO CONTROLLER and ignore the pad.
@@ -26,4 +35,27 @@ public static class VcEnginePatches
         }
         return copy;
     }
+
+    /// <summary>
+    /// Returns the engine with every draw sampling both textures (mask 3), so draws whose texture the engine decided not to
+    /// sample still get it. Verified in Cemu with Banjo-Tooie: the counter digits of the pause screen and the dust puffs
+    /// under Banjo appear.
+    /// </summary>
+    /// <exception cref="InvalidDataException">The engine is not an RPX or does not contain the instruction sequences.</exception>
+    public static byte[] SampleBothTextures(byte[] engine)
+    {
+        var copy = (byte[])engine.Clone();
+        try
+        {
+            RpxPatcher.PatchMatching(copy, MaskStoreA, Exact(MaskStoreA), 0, LiR10Three);
+            RpxPatcher.PatchMatching(copy, MaskStoreB, Exact(MaskStoreB), 0, LiR10Three);
+        }
+        catch (InvalidDataException e)
+        {
+            throw new InvalidDataException("This base's VC engine cannot be patched to sample the draw texture (" + e.Message + "). Choose another base.", e);
+        }
+        return copy;
+    }
+
+    private static uint[] Exact(uint[] words) => words.Select(_ => 0xFFFFFFFFu).ToArray();
 }

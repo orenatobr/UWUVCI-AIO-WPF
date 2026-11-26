@@ -71,4 +71,17 @@ public class VcIniTests
         var ini = VcIni.Build(new VcIniOptions("G", "US") { ExtraSections = "[Input]\r\nStickModify = 2" });
         Assert.EndsWith("\n\n[Input]\nStickModify = 2\n", ini);
     }
+
+    [Fact]
+    public void Build_WritesTheEepromInitValueOnlyForAnEeprom()
+    {
+        var eeprom = VcIni.Build(new VcIniOptions("G", "EU") { BackupType = BackupType.Eeprom, BackupSize = "2048", EepromInitValue = 255 });
+        Assert.Contains("BackupSize = 2048\nEEROMInitValue = 255\n", eeprom);
+        var sram = VcIni.Build(new VcIniOptions("G", "EU") { BackupType = BackupType.Sram, BackupSize = null, EepromInitValue = 255 });
+        Assert.DoesNotContain("EEROMInitValue", sram);
+    }
+
+    [Fact]
+    public void Build_OmitsTheEepromInitValueByDefault() =>
+        Assert.DoesNotContain("EEROMInitValue", VcIni.Build(new VcIniOptions("G", "EU") { BackupType = BackupType.Eeprom }));
 }

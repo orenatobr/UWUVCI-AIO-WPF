@@ -22,6 +22,8 @@ public sealed record VcIniOptions(string GameName, string Region)
     public BackupType BackupType { get; init; } = BackupType.Auto;
     /// <summary>One of 512, 2048, 4K, 16K; null omits the key (SRAM and Flash do not use it).</summary>
     public string? BackupSize { get; init; } = "512";
+    /// <summary>Byte the EEPROM starts with, written only for an EEPROM save. A new chip is 0xFF; the emulator's own default is 0.</summary>
+    public int? EepromInitValue { get; init; }
     /// <summary>Sync frame pacing to vertical retrace.</summary>
     public bool RetraceByVsync { get; init; }
     /// <summary>Use the timer based pacing mode.</summary>
@@ -57,6 +59,7 @@ public static class VcIni
         sb.Append("[RomOption]\n");
         sb.Append("BackupType = ").Append((int)o.BackupType).Append('\n');
         if (o.BackupSize is not null) sb.Append("BackupSize = ").Append(o.BackupSize).Append('\n');
+        if (o.BackupType == BackupType.Eeprom && o.EepromInitValue is { } init) sb.Append("EEROMInitValue = ").Append(init).Append('\n');
         if (o.RetraceByVsync) sb.Append("RetraceByVsync = 1\n");
         if (o.UseTimer) sb.Append("UseTimer = 1\n");
         if (o.TrueBoot) sb.Append("TrueBoot = 1\n");

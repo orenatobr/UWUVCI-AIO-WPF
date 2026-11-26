@@ -30,19 +30,20 @@ public class N64ProfilesTests
     }
 
     [Fact]
-    public void SaveOverride_Eeprom_OnBanjoTooie_KeepsTheSixteenKilobitSize()
-    {
-        var g = N64GameDatabase.Find(0xC2E9AA9A, 0x475D70AA)!;   // Banjo-Tooie: its profile is SRAM, its EEPROM is 16 Kbit (2048 bytes)
-        var o = N64Profiles.For(g, new RomHeader(0xC2E9AA9A, 0x475D70AA, "T", "NB7E"), null, BackupType.Eeprom);
-        Assert.Equal(BackupType.Eeprom, o.BackupType);
-        Assert.Equal("2048", o.BackupSize);
-    }
-
-    [Fact]
-    public void BanjoTooie_DefaultsToSram_WithoutASize()
+    public void BanjoTooie_UsesTheSixteenKilobitEeprom_StartedBlank()
     {
         var g = N64GameDatabase.Find(0xC2E9AA9A, 0x475D70AA)!;
         var o = N64Profiles.For(g, new RomHeader(0xC2E9AA9A, 0x475D70AA, "T", "NB7E"), null);
+        Assert.Equal(BackupType.Eeprom, o.BackupType);
+        Assert.Equal("2048", o.BackupSize);
+        Assert.Equal(255, o.EepromInitValue);   // zeros read as a damaged save and the first scene never advances
+    }
+
+    [Fact]
+    public void SaveOverride_Sram_OnBanjoTooie_DropsTheSize()
+    {
+        var g = N64GameDatabase.Find(0xC2E9AA9A, 0x475D70AA)!;
+        var o = N64Profiles.For(g, new RomHeader(0xC2E9AA9A, 0x475D70AA, "T", "NB7E"), null, BackupType.Sram);
         Assert.Equal(BackupType.Sram, o.BackupType);
         Assert.Null(o.BackupSize);
     }

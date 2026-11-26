@@ -4,6 +4,11 @@ using System.Text;
 
 namespace UWUVCI.Core.Injection
 {
+    /// <summary>Fractions of the frame texture to drop from the right and the bottom (0 to 0.5 each).</summary>
+    /// <param name="Right">Share of the width that is black on the right.</param>
+    /// <param name="Bottom">Share of the height that is black at the bottom.</param>
+    public readonly record struct FrameCrop(float Right, float Bottom);
+
     /// <summary>Patches the FrameLayout.arc of an N64 base for widescreen and the dark filter.</summary>
     public static class N64FrameLayoutPatcher
     {
@@ -11,12 +16,16 @@ namespace UWUVCI.Core.Injection
         /// <param name="archive">FrameLayout.arc contents.</param>
         /// <param name="widescreen">Stretch the picture to 16:9.</param>
         /// <param name="removeDarkFilter">Hide the darkening overlay.</param>
-        public static void Apply(byte[] archive, bool widescreen, bool removeDarkFilter)
+        /// <param name="crop">Optional crop of the frame's texture rectangle, for pictures the engine draws short of the frame.</param>
+        public static void Apply(byte[] archive, bool widescreen, bool removeDarkFilter, FrameCrop? crop = null)
         {
             if (archive == null)
                 throw new ArgumentNullException(nameof(archive));
-            if (!widescreen && !removeDarkFilter)
+            bool resize = widescreen || removeDarkFilter;
+            if (!resize && crop is null)
                 return;
+            if (crop is { } c && !(c.Right >= 0f && c.Right < 0.5f && c.Bottom >= 0f && c.Bottom < 0.5f))
+                throw new ArgumentOutOfRangeException(nameof(crop), "The crop must be between 0 and 0.5 on each side.");
 
             RequireRange(archive, 0, 0x40);
             if (!HasTag(archive, 0, "SARC") || ReadUInt16(archive, 6) != 0xFEFF)
@@ -62,7 +71,7 @@ namespace UWUVCI.Core.Injection
 
                     if (name == "frame")
                     {
-                        if (sectionSize < 0x50)
+                        if (sectionSize < (crop is null ? 0x50 : FrameUvEnd))
                             throw new InvalidDataException("The N64 frame pane is too short to patch.");
                         frameOffset = offset;
                     }
@@ -81,13 +90,30 @@ namespace UWUVCI.Core.Injection
                 throw new InvalidDataException("The N64 base's frame layout is missing its frame or dark-filter pane.");
 
             // Validate both panes before changing any bytes; Wii U floats are big-endian.
-            WriteUInt32(archive, frameOffset + 0x2C, 0);
-            WriteUInt32(archive, frameOffset + 0x30, 0);
-            WriteUInt32(archive, frameOffset + 0x44, 0x3F800000);
-            WriteUInt32(archive, frameOffset + 0x48, 0x3F800000);
-            WriteUInt32(archive, frameOffset + 0x4C, widescreen ? 0x44F00000u : 0x44B40000u);
-            archive[maskOffset + 0x08] = removeDarkFilter ? (byte)0 : (byte)1;
+            if (resize)
+            {
+                WriteUInt32(archive, frameOffset + 0x2C, 0);
+                WriteUInt32(archive, frameOffset + 0x30, 0);
+                WriteUInt32(archive, frameOffset + 0x44, 0x3F800000);
+                WriteUInt32(archive, frameOffset + 0x48, 0x3F800000);
+                WriteUInt32(archive, frameOffset + 0x4C, widescreen ? 0x44F00000u : 0x44B40000u);
+                archive[maskOffset + 0x08] = removeDarkFilter ? (byte)0 : (byte)1;
+            }
+
+            if (crop is { } cut)
+            {
+                // The pane's texture rectangle is (0,0) (1,0) (0,1) (1,1) as top left, top right, bottom left, bottom right.
+                uint right = BitConverter.SingleToUInt32Bits(1f - cut.Right), bottom = BitConverter.SingleToUInt32Bits(1f - cut.Bottom);
+                WriteUInt32(archive, frameOffset + FrameUv + 8, right);        // top right s
+                WriteUInt32(archive, frameOffset + FrameUv + 20, bottom);      // bottom left t
+                WriteUInt32(archive, frameOffset + FrameUv + 24, right);       // bottom right s
+                WriteUInt32(archive, frameOffset + FrameUv + 28, bottom);      // bottom right t
+            }
         }
+
+        // The four (s, t) pairs of a picture pane follow its pane header, vertex colors and material index.
+        private const int FrameUv = 0x68;
+        private const int FrameUvEnd = FrameUv + 32;
 
         private static bool HasTag(byte[] data, int offset, string tag)
         {

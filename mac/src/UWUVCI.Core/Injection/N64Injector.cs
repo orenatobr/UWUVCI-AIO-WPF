@@ -47,11 +47,12 @@ public static class N64Injector
 
         if (engine is not null) File.WriteAllBytes(enginePath!, engine);
 
-        if (options.WideScreen || options.DarkFilter)
+        var crop = N64Profiles.FrameCrop(game, header);
+        if (options.WideScreen || options.DarkFilter || crop is not null)
         {
             var layout = Path.Combine(baseDir, "content", "FrameLayout.arc");
             var arc = File.ReadAllBytes(layout);
-            N64FrameLayoutPatcher.Apply(arc, options.WideScreen, options.DarkFilter);
+            N64FrameLayoutPatcher.Apply(arc, options.WideScreen, options.DarkFilter, crop);
             File.WriteAllBytes(layout, arc);
         }
     }

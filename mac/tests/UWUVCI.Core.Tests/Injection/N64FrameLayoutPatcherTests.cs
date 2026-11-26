@@ -37,4 +37,58 @@ public class N64FrameLayoutPatcherTests
     {
         Assert.Throws<InvalidDataException>(() => N64FrameLayoutPatcher.Apply(new byte[0x80], true, false));
     }
+
+    private static float Single(byte[] a, int o) => BitConverter.UInt32BitsToSingle(Float(a, o));
+
+    [Fact]
+    public void Crop_ShrinksTheFrameTextureRectToTheDrawnPartOfThePicture()
+    {
+        var arc = FrameLayoutArc.Build(0x88);
+        N64FrameLayoutPatcher.Apply(arc, false, false, new FrameCrop(0.05f, 0.1f));
+        int uv = FrameLayoutArc.FrameUvOffset;
+        Assert.Equal(0f, Single(arc, uv));                 // TL s
+        Assert.Equal(0f, Single(arc, uv + 4));             // TL t
+        Assert.Equal(0.95f, Single(arc, uv + 8), 5);       // TR s
+        Assert.Equal(0f, Single(arc, uv + 12));            // TR t
+        Assert.Equal(0f, Single(arc, uv + 16));            // BL s
+        Assert.Equal(0.9f, Single(arc, uv + 20), 5);       // BL t
+        Assert.Equal(0.95f, Single(arc, uv + 24), 5);      // BR s
+        Assert.Equal(0.9f, Single(arc, uv + 28), 5);       // BR t
+    }
+
+    [Fact]
+    public void CropOnly_DoesNotTouchTheFrameSizeOrTheDarkFilter()
+    {
+        var arc = FrameLayoutArc.Build(0x88);
+        var width = Float(arc, FrameLayoutArc.FrameWidthOffset); var mask = arc[FrameLayoutArc.MaskFlagOffset];
+        N64FrameLayoutPatcher.Apply(arc, false, false, new FrameCrop(0.05f, 0.05f));
+        Assert.Equal(width, Float(arc, FrameLayoutArc.FrameWidthOffset));
+        Assert.Equal(mask, arc[FrameLayoutArc.MaskFlagOffset]);
+    }
+
+    [Fact]
+    public void CropWithWidescreen_DoesBoth()
+    {
+        var arc = FrameLayoutArc.Build(0x88);
+        N64FrameLayoutPatcher.Apply(arc, true, false, new FrameCrop(0.05f, 0.05f));
+        Assert.Equal(0x44F00000u, Float(arc, FrameLayoutArc.FrameWidthOffset));
+        Assert.Equal(0.95f, Single(arc, FrameLayoutArc.FrameUvOffset + 24), 5);
+    }
+
+    [Fact]
+    public void Crop_OnAPaneWithoutTextureCoordinates_IsRejected()
+    {
+        var arc = FrameLayoutArc.Build(0x60);   // too short to hold the four coordinates
+        Assert.Throws<InvalidDataException>(() => N64FrameLayoutPatcher.Apply(arc, false, false, new FrameCrop(0.05f, 0.05f)));
+    }
+
+    [Theory]
+    [InlineData(-0.1f, 0f)]
+    [InlineData(0f, 0.5f)]
+    [InlineData(0.6f, 0f)]
+    public void Crop_OutsideZeroToHalf_IsRejected(float right, float bottom)
+    {
+        var arc = FrameLayoutArc.Build(0x88);
+        Assert.Throws<ArgumentOutOfRangeException>(() => N64FrameLayoutPatcher.Apply(arc, false, false, new FrameCrop(right, bottom)));
+    }
 }

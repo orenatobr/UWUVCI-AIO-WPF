@@ -120,4 +120,24 @@ public class RpxPatcherPatternTests
         Assert.Contains("more than once", ex.Message);
         Assert.Equal(copy, rpx);
     }
+
+    [Fact]
+    public void ASecondPatchMayUseTheSpaceTheFirstOneFreed()
+    {
+        // A patch that compresses better shrinks the section's recorded size. A later patch that makes the stream
+        // larger again must still fit in the space the file really has up to the next section.
+        var code = new byte[4096 * 4];
+        var rng = new Random(11);
+        for (int i = 0; i < 4096; i++)
+            BinaryPrimitives.WriteUInt32BigEndian(code.AsSpan(i * 4), i % 16 == 0 ? (uint)rng.Next() : 0x60000000u);   // mostly nops
+        var rpx = SyntheticRpx.Build(code);
+        int index = 16;                                          // one of the random words
+        uint original = BinaryPrimitives.ReadUInt32BigEndian(code.AsSpan(index * 4));
+        uint address = SyntheticRpx.CodeAddress + (uint)(index * 4);
+
+        RpxPatcher.PatchWord(rpx, address, original, 0x60000000);   // compresses better
+        RpxPatcher.PatchWord(rpx, address, 0x60000000, original);   // back to the larger stream
+
+        Assert.Equal(code, SyntheticRpx.Read(rpx).Code);
+    }
 }

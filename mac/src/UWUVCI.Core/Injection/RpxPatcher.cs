@@ -5,8 +5,8 @@ namespace UWUVCI.Core.Injection;
 
 /// <summary>
 /// Changes one instruction word in the compressed code section of a Wii U RPX, without moving any section.
-/// The section is inflated, edited and deflated again (it can only get smaller or stay the same, never
-/// larger, so the spare bytes stay unused), and its entry in the CRC table is updated.
+/// The section is inflated, edited and deflated again (the new stream must fit in the space the file has up to the
+/// next section, so spare bytes stay unused), and its entry in the CRC table is updated.
 /// </summary>
 public static class RpxPatcher
 {
@@ -78,6 +78,16 @@ public static class RpxPatcher
 
             int p = locate(code, U32(sh + 12));
             if (p < 0) continue;
+
+            // The recorded size shrinks after every patch, so the limit is the room the file really has: up to the
+            // start of the next section's data (or the end of the file).
+            int capacity = rpx.Length - secOff;
+            for (int s = 0; s < count; s++)
+            {
+                int other = (int)U32(shoff + s * entSize + 16);
+                if (other > secOff && other - secOff < capacity) capacity = other - secOff;
+            }
+            capacity = Math.Max(capacity, secSize);
             BinaryPrimitives.WriteUInt32BigEndian(code.AsSpan(p), value);
 
             byte[]? best = null;
@@ -85,11 +95,11 @@ public static class RpxPatcher
             {
                 using var ms = new MemoryStream();
                 using (var z = new ZLibStream(ms, level, leaveOpen: true)) z.Write(code);
-                if (4 + ms.Length <= secSize && (best is null || ms.Length < best.Length)) best = ms.ToArray();
+                if (4 + ms.Length <= capacity && (best is null || ms.Length < best.Length)) best = ms.ToArray();
             }
             if (best is null) throw new InvalidDataException("The patched code section does not fit in its original space.");
 
-            var section = rpx.AsSpan(secOff, secSize);
+            var section = rpx.AsSpan(secOff, Math.Max(secSize, 4 + best.Length));
             section.Clear();
             BinaryPrimitives.WriteUInt32BigEndian(section, usize);
             best.CopyTo(section[4..]);

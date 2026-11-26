@@ -65,10 +65,30 @@ public class N64ProfilesTests
     }
 
     [Fact]
-    public void BanjoTooieUs_DoesNotGetTheEuClip()
+    public void BanjoTooieUs_CropsTheFrameInTheLayoutNotInTheIni()
     {
-        var o = N64Profiles.For(null, new RomHeader(1, 2, "Banjo-Tooie (U)", "NB7E"), null);
-        Assert.DoesNotContain("ClipRight", o.ExtraSections);
+        var header = new RomHeader(1, 2, "Banjo-Tooie (U)", "NB7E");
+        // The engine honors only the first key of [Render] (measured in Cemu: ClipRight first drops ClipBottom and the reverse),
+        // so the two 5% bars of the US picture are cropped in the layout instead.
+        Assert.DoesNotContain("[Render]", N64Profiles.For(null, header, null).ExtraSections);
+        var crop = N64Profiles.FrameCrop(null, header);
+        Assert.NotNull(crop);
+        Assert.Equal(33f / 640f, crop!.Value.Right, 5);
+        Assert.Equal(24f / 480f, crop.Value.Bottom, 5);
+    }
+
+    [Fact]
+    public void BanjoTooieEu_KeepsTheIniClipAndHasNoLayoutCrop()
+    {
+        var header = new RomHeader(1, 2, "Banjo-Tooie (E)", "NB7P");
+        Assert.Null(N64Profiles.FrameCrop(null, header));   // the EU picture is cut at the bottom, not short of it
+        Assert.DoesNotContain("ClipBottom", N64Profiles.For(null, header, null).ExtraSections);
+    }
+
+    [Fact]
+    public void OtherGames_HaveNoLayoutCrop()
+    {
+        Assert.Null(N64Profiles.FrameCrop(null, new RomHeader(1, 2, "SOME GAME", "NXXE")));
     }
 
     [Fact]

@@ -57,6 +57,19 @@ public class N64InjectorTests
     }
 
     [Fact]
+    public void Inject_BanjoTooieUs_CropsTheFrameEvenWithoutWidescreen()
+    {
+        using var b = new TestBase();
+        WriteEngine(b);
+        var layout = Path.Combine(b.Content, "FrameLayout.arc");
+        File.WriteAllBytes(layout, FrameLayoutArc.Build(0x88));
+        N64Injector.Inject(b.Root.FullName, RomFile(b, Z64()), new N64Options());
+        var arc = File.ReadAllBytes(layout);
+        var brs = BitConverter.UInt32BitsToSingle(System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(arc.AsSpan(FrameLayoutArc.FrameUvOffset + 24)));
+        Assert.Equal(1f - 33f / 640f, brs, 5);
+    }
+
+    [Fact]
     public void Inject_OtherGames_LeaveTheEngineAlone()
     {
         using var b = new TestBase();

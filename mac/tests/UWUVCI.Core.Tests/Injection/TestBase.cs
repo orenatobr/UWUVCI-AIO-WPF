@@ -14,6 +14,7 @@ internal sealed class TestBase : IDisposable
         Directory.CreateDirectory(Path.Combine(Root.FullName, "code"));
         File.WriteAllBytes(Path.Combine(Content, "rom", "NAAE.z64"), new byte[] { 1, 2, 3, 4 });
         File.WriteAllText(Path.Combine(Content, "config", "NAAE.z64.ini"), "old");
+        File.WriteAllBytes(Path.Combine(Content, "FrameLayout.arc"), FrameLayoutArc.Build(0x88));   // every real base has one
         File.WriteAllText(Path.Combine(Root.FullName, "meta", "meta.xml"), MetaXml);
         File.WriteAllText(Path.Combine(Root.FullName, "code", "app.xml"), AppXml);
         File.WriteAllText(Path.Combine(Root.FullName, "code", "cos.xml"),

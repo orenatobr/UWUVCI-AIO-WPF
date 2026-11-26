@@ -17,6 +17,11 @@ public static class N64Profiles
     // covers 100.1% of the frame and the whole scene is still there).
     private const string BanjoEuRender = "\n[Render]\nClipRight = 33\n";
 
+    // The US picture has the same 5% bar on the right and another one at the bottom. The engine honors only the first key
+    // of [Render] (measured in Cemu with the US ROM: ClipRight first drops ClipBottom, and the reverse), so the two bars
+    // are cropped in the frame layout instead (FrameCrop). ClipBottom 24 of 480 was the smallest that closed the bar.
+    private static readonly FrameCrop BanjoUsFrameCrop = new(33f / 640f, 24f / 480f);
+
     private const string GoldenEyeJp =
         "[BreakBlockInst]\nCount = 1\nAddress0 = 0x7f0d0eeC\nInst0 = 0x24420004\nJmpPC0= 0x7f0d0ee8\nType0 = 1\n\n" +
         "[Render]\nFogVertexAlpha = 0\n";
@@ -69,6 +74,15 @@ public static class N64Profiles
     }
 
     /// <summary>True for Banjo-Tooie, which needs the engine to answer a 16 Kbit EEPROM (see <c>VcEnginePatches</c>).</summary>
+    /// <summary>The part of the frame texture to drop in the layout, or null when the game needs none.</summary>
+    public static FrameCrop? FrameCrop(N64Game? game, RomHeader header)
+    {
+        var name = game?.Name ?? header.Title;
+        if (!IsBanjoTooie(name))
+            return null;
+        return RegionLabel(name, header) == "EU" ? null : BanjoUsFrameCrop;
+    }
+
     public static bool NeedsEeprom16KAnswer(N64Game? game, RomHeader header) => IsBanjoTooie(game?.Name ?? header.Title);
 
     private static bool IsBanjoTooie(string name) => name.StartsWith("Banjo-Tooie", StringComparison.OrdinalIgnoreCase);

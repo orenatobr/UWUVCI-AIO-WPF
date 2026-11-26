@@ -94,8 +94,9 @@ public class N64InjectorTests
         var ini = File.ReadAllText(Path.Combine(b.Content, "config", "NAAE.z64.ini"));
         Assert.StartsWith(";", ini);
         Assert.Contains("[RomOption]", ini);
-        Assert.Contains("BackupType = 1", ini);   // Banjo-Tooie: SRAM, the only save type that boots in Cemu (EEPROM stays on the first scene)
-        Assert.DoesNotContain("BackupSize", ini);
+        Assert.Contains("BackupType = 3", ini);   // Banjo-Tooie: EEPROM, as on a Wii U
+        Assert.Contains("BackupSize = 2048", ini);
+        Assert.Contains("EEROMInitValue = 255", ini);   // a blank EEPROM is 0xFF; zeros keep the first scene from advancing
         Assert.Contains("TrueBoot = 1", ini);      // community ini for NB7E
         Assert.Contains("StickModify = 2", ini);
         Assert.DoesNotContain("RamSize", ini);     // works with the default RAM, do not experiment
@@ -190,7 +191,7 @@ public class N64InjectorTargetGameTests
     [Theory]
     [InlineData(0x30C7AC50u, 0x7704072Du, "Conker", "BackupType = 3")]
     [InlineData(0x8A6009B6u, 0x94ACE150u, "Jet Force Gemini", "BackupType = 2")]
-    [InlineData(0xC2E9AA9Au, 0x475D70AAu, "Banjo-Tooie", "BackupType = 1")]
+    [InlineData(0xC2E9AA9Au, 0x475D70AAu, "Banjo-Tooie", "BackupType = 3")]
     [InlineData(0xDCBC50D1u, 0x09FD1AA3u, "GoldenEye", "BackupSize = 512")]
     [InlineData(0x2F70F10Du, 0x5C4187FFu, "Turok - Dinosaur Hunter", "MemPack = 1")]
     [InlineData(0x49088A11u, 0x6494957Eu, "Turok 2", "MemPack = 1")]

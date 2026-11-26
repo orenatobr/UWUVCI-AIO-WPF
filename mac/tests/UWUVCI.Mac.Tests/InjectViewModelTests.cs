@@ -61,16 +61,16 @@ public class InjectViewModelTests
     }
 
     [Fact]
-    public void SaveChoice_Eeprom_UpdatesPreview_AndProfileFollowsTheGame()
+    public void SaveChoice_Sram_UpdatesPreview_AndProfileFollowsTheGame()
     {
         using var f = new Fixture();
         f.Vm.SetRom(f.Dir.File("bt.z64", TestData.BanjoTooie()));
-        Assert.Contains("BackupType = 1", f.Vm.IniPreview);          // Banjo-Tooie: SRAM, the save type that boots in Cemu
-        Assert.DoesNotContain("BackupSize", f.Vm.IniPreview);
-        f.Vm.SaveChoice = SaveChoice.Eeprom;
-        Assert.Contains("BackupType = 3", f.Vm.IniPreview);
-        f.Vm.SaveChoice = SaveChoice.Profile;
+        Assert.Contains("BackupType = 3", f.Vm.IniPreview);          // Banjo-Tooie: EEPROM, as on a Wii U
+        f.Vm.SaveChoice = SaveChoice.Sram;
         Assert.Contains("BackupType = 1", f.Vm.IniPreview);
+        Assert.DoesNotContain("BackupSize", f.Vm.IniPreview);
+        f.Vm.SaveChoice = SaveChoice.Profile;
+        Assert.Contains("BackupType = 3", f.Vm.IniPreview);
     }
 
     [Fact]

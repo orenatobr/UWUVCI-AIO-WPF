@@ -56,8 +56,9 @@ public static class N64Profiles
     private static VcIniOptions Tune(string name, VcIniOptions o)
     {
         if (IsBanjoTooie(name))
-            // SRAM: with the EEPROM save the first scene never advances in Cemu. The EEPROM size answer is fixed in the engine (VcEnginePatches).
-            return o with { BackupType = BackupType.Sram, BackupSize = null, RetraceByVsync = true, TrueBoot = true, ExtraSections = o.Region == "EU" ? BanjoInput + BanjoEuRender : BanjoInput };
+            // The 16 Kbit EEPROM answer is fixed in the engine (VcEnginePatches). The emulator starts the EEPROM at 0, which the game
+            // reads as a damaged save and the first scene never advances; a new chip is 0xFF (verified in Cemu: with 255 the title shows at 50 s).
+            return o with { EepromInitValue = 255, RetraceByVsync = true, TrueBoot = true, ExtraSections = o.Region == "EU" ? BanjoInput + BanjoEuRender : BanjoInput };
         if (name.StartsWith("Conker's Bad Fur Day", StringComparison.OrdinalIgnoreCase))
             return o with { RetraceByVsync = true, UseTimer = true };
         if (name.StartsWith("Jet Force Gemini", StringComparison.OrdinalIgnoreCase))

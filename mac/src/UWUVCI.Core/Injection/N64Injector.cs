@@ -22,7 +22,7 @@ public static class N64Injector
         {
             enginePath = Directory.Exists(Path.Combine(baseDir, "code")) ? Directory.GetFiles(Path.Combine(baseDir, "code"), "*.rpx").FirstOrDefault() : null;
             if (enginePath is null) throw new InvalidDataException("The base has no VC engine (.rpx) in code.");
-            engine = VcEnginePatches.AnswerEeprom16K(File.ReadAllBytes(enginePath));
+            engine = VcEnginePatches.SampleBothTextures(VcEnginePatches.AnswerEeprom16K(File.ReadAllBytes(enginePath)));
         }
 
         var romDir = Path.Combine(baseDir, "content", "rom");

@@ -18,12 +18,24 @@ public class N64InjectorTests
     // li r11,0x4000 / cmpwi r12,0x800 / stb r7,1(r26) / beq +8 / li r11,0 / ori r10,r11,0x8000: how the engine answers the EEPROM size query
     private static readonly uint[] EepromAnswer = [0x39604000, 0x2C0C0800, 0x98FA0001, 0x41820008, 0x39600000, 0x616A8000];
 
-    internal static string WriteEngine(TestBase b, bool withSequence = true)
+    // lwz r10,0(r26) / stw r10,0xc8(r26) and lwz r10,0(r26) / stfs f1,0xe8(r26) / stw r10,0xc8(r26): where the engine stores the
+    // mask of textures a draw samples (the pixel shader reads it as uf_remappedPS[0].z)
+    private static readonly uint[] TextureMaskA = [0x815A0000, 0x915A00C8];
+    private static readonly uint[] TextureMaskB = [0x815A0000, 0xD03A00E8, 0x915A00C8];
+
+    internal static string WriteEngine(TestBase b, bool withSequence = true, bool withTextureMask = true)
     {
         var code = SyntheticRpx.Code();
         if (withSequence)
             for (int i = 0; i < EepromAnswer.Length; i++)
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(code.AsSpan((300 + i) * 4), EepromAnswer[i]);
+        if (withTextureMask)
+        {
+            for (int i = 0; i < TextureMaskA.Length; i++)
+                System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(code.AsSpan((500 + i) * 4), TextureMaskA[i]);
+            for (int i = 0; i < TextureMaskB.Length; i++)
+                System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(code.AsSpan((600 + i) * 4), TextureMaskB[i]);
+        }
         var path = Path.Combine(b.Root.FullName, "code", "VESSEL.rpx");
         File.WriteAllBytes(path, SyntheticRpx.Build(code));
         return path;
@@ -67,6 +79,31 @@ public class N64InjectorTests
         var arc = File.ReadAllBytes(layout);
         var brs = BitConverter.UInt32BitsToSingle(System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(arc.AsSpan(FrameLayoutArc.FrameUvOffset + 24)));
         Assert.Equal(1f - 33f / 640f, brs, 5);
+    }
+
+    [Fact]
+    public void Inject_BanjoTooie_MakesTheEngineSampleBothTexturesOfEveryDraw()
+    {
+        using var b = new TestBase();
+        var rpx = WriteEngine(b);
+        N64Injector.Inject(b.Root.FullName, RomFile(b, Z64()), new N64Options());
+        var code = SyntheticRpx.Read(File.ReadAllBytes(rpx)).Code;
+        uint Word(int i) => System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(code.AsSpan(i * 4));
+        Assert.Equal(0x39400003u, Word(500));     // li r10,3: both textures
+        Assert.Equal(0x915A00C8u, Word(501));     // the store of the mask is kept
+        Assert.Equal(0x39400003u, Word(600));
+        Assert.Equal(0xD03A00E8u, Word(601));
+    }
+
+    [Fact]
+    public void Inject_BanjoTooie_OnAnEngineWithoutTheTextureMaskSequence_FailsBeforeTouchingTheBase()
+    {
+        using var b = new TestBase();
+        var rpx = WriteEngine(b, withTextureMask: false);
+        var before = File.ReadAllBytes(rpx);
+        var ex = Assert.Throws<InvalidDataException>(() => N64Injector.Inject(b.Root.FullName, RomFile(b, Z64()), new N64Options()));
+        Assert.Contains("texture", ex.Message);
+        Assert.Equal(before, File.ReadAllBytes(rpx));
     }
 
     [Fact]

@@ -332,3 +332,15 @@ Two defects remain in Cemu with the Banjo-Tooie US title: a dark translucent rec
 So both defects have the same likely cause: the Cemu `GX2CopySurface` limitation with the engine's format-converting read-back. The official engine depends on that conversion on a Wii U, so the defects are expected to be absent on real hardware. This is not proven: no Wii U was available, and Cemu could not be changed here (no source tree). The shipped title therefore keeps the engine as it is. The experimental patch that hides these rectangles (five words in place: `0x202bf74` to `0x202bf84`, `blender == 0x504241` jumps to the draw exit `0x202c174`) works in Cemu but removes the shadows, so it is not applied.
 
 Test notes: the `screencapture -l <window id>` capture works with the screen unlocked; graphic pack hooks must not start the codecave with a hook (put two `blr` first), and pointers read in a hook need a range check.
+
+### Update (2026-11-27): the black pause background in Cemu
+
+A clean pause (one START about 300 PIF reads after the first gameplay frame; repeated START presses toggle the pause and give misleading black frames) shows the whole menu (RETURN TO GAME, VIEW TOTALS, SAVE AND QUIT, the HUD counters), drawn correctly, over a black background from the first pause frame. A pause frame has about 115 draws (HUD and menu); the 3D scene is not drawn, so the background has to come from the engine's persistence of the previous picture.
+
+What was measured (Cemu 2.6, graphic pack hooks, US ROM):
+* Each N64 frame has two passes into two 640 x 480 RGBA8 buffers (A and B). The initial copy of the previous output (call site `0x2029868`, texture 960 x 720 = the output buffer) only goes to the first pass target; the output is rewritten from A in one host frame and from B in the next, so both buffers are shown on the TV in turn.
+* Ruled out, one by one, in a clean pause: the copy-in quad (full 0,0 to 304,228 in game and pause), viewport and scissor, blend of the copy-in, `GX2ClearColor` and `GX2ClearBuffersEx`, a full-screen overlay (none), every texture class of the pause frame, the whole N64 draw list, the output shader (it only scales and biases), copying A into B at the start of pass two.
+* A `GX2ClearColor` on A at the end of a frame does show on the TV, so hooks reach what is displayed: the black is in the content of both buffers.
+* Not settled: whether the scene is lost in the copy-in or the game really expects the engine to keep the picture. Reading buffers back from a hook (`GX2CopySurface` to the engine's staging surface) returned zeros, and a `GX2ClearColor` on the auxiliary buffer hangs the title.
+
+Test notes: the shader replacement and hook scripts are not in the repository; hooks must not start the codecave, and `GX2ClearColor` must only be used on the two pass buffers.

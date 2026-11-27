@@ -319,3 +319,16 @@ Still open in Banjo-Tooie US (both absent from mupen64plus):
 * The pause screen background is black (no frozen scene behind the menu).
 * The 27 `[Render]` keys of the engine, tried one at a time, change neither (the engine reads only the first key of the section).
 * Not tested on a real Wii U.
+
+## Banjo-Tooie US: dark rectangle under characters and black pause menu (2026-11-27)
+
+Two defects remain in Cemu with the Banjo-Tooie US title: a dark translucent rectangle under Banjo and the other characters, and a pause menu (START) that shows only the HUD over black. Instrumenting the engine in Cemu (graphic pack hooks, window captures) gives this chain:
+
+* The rectangle is the character shadow. Its draw is the engine's generic RDP rectangle draw (call site `0x202c09c`, quad primitive `0x13`) with N64 blender word `0x504241`; skipping that call site removes the rectangle (and the shadow with it, so that is not a fix). The rectangles are strips 112 wide (x2 for 128, 144, 160, 176, 192 as the shadow scales with distance).
+* The texture those draws sample is an R8 (I8) texture whose data is all zero, so the shader reads texel 0 as (0, 0, 0, 0): the blob shape is lost and the whole quad is blended with a flat alpha.
+* The engine fills such textures from a CPU read-back of the picture: around `0x2032c30` it calls `GX2CopySurface` from the 640 x 480 RGBA8 output into an RGBA4 (3521 calls in a 140 s run) or R8 (1178 calls) surface, waits with `GX2DrawDone`, then reads that surface on the CPU and writes it into the emulated N64 RDRAM. The game reads that RDRAM as a texture (shadows) and as the saved picture behind the pause menu.
+* Cemu's `GX2CopySurfaceInternal` (`src/Cafe/OS/libs/gx2/GX2_Surface_Copy.cpp`) compares only the bits per pixel of the two surfaces and returns without copying when they differ, with a debug-only log line. RGBA8 (32 bpp) to RGBA4 (16 bpp) or R8 (8 bpp) is therefore dropped and the read-back buffer stays zero.
+
+So both defects have the same likely cause: the Cemu `GX2CopySurface` limitation with the engine's format-converting read-back. The official engine depends on that conversion on a Wii U, so the defects are expected to be absent on real hardware. This is not proven: no Wii U was available, and Cemu could not be changed here (no source tree). The shipped title therefore keeps the engine as it is. The experimental patch that hides these rectangles (five words in place: `0x202bf74` to `0x202bf84`, `blender == 0x504241` jumps to the draw exit `0x202c174`) works in Cemu but removes the shadows, so it is not applied.
+
+Test notes: the `screencapture -l <window id>` capture works with the screen unlocked; graphic pack hooks must not start the codecave with a hook (put two `blr` first), and pointers read in a hook need a range check.

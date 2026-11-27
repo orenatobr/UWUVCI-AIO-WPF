@@ -1,0 +1,6 @@
+[Definition]
+titleIds = 0005000200000000
+name = UWUVCI Banjo-Tooie shadows
+path = "UWUVCI/Banjo-Tooie shadows"
+description = Draws the character shadows as translucent ellipses instead of dark rectangles (Cemu only)
+version = 7

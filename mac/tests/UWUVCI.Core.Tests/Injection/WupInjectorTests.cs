@@ -108,6 +108,24 @@ public class WupInjectorTests
     }
 
     [Fact]
+    public void Run_N64_PacksTheTitleIdOfTheBaseAppXml()
+    {
+        // CNUSPACKER looks for app.xml under "<in>\\code\\app.xml"; without the shim it found nothing on macOS and packed title id 0.
+        using var b = new TestBase();
+        var outRoot = Directory.CreateTempSubdirectory();
+        try
+        {
+            var req = new InjectRequest(GameConsole.N64, MakeRom(outRoot.FullName), b.Root.FullName, "Pack Test");
+            var output = WupInjector.Run(req, outRoot.FullName, new string('0', 32));
+            var tmd = File.ReadAllBytes(Path.Combine(output, "title.tmd"));
+            var id = Convert.ToHexString(tmd.AsSpan(0x18C, 8));                      // title id in the TMD header
+            Assert.NotEqual("0000000000000000", id);
+            Assert.StartsWith("00050002", id);                                        // MetaXml.Apply writes 00050002 + a random id
+        }
+        finally { outRoot.Delete(true); }
+    }
+
+    [Fact]
     public void Pack_RefusesStrayFilesInBaseRoot()
     {
         using var b = new TestBase();

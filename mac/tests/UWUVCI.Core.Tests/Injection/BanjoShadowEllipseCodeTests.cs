@@ -23,4 +23,11 @@ public class BanjoShadowEllipseCodeTests
     [Fact]
     public void TheEngineIsRefusedWhenItIsNotTheOneThePatchWasMadeFor() =>
         Assert.Throws<InvalidDataException>(() => VcEnginePatches.ShadowEllipses(new byte[256]));
+
+    [Fact]
+    public void TheKeepEngineDrawBranchIsABne()
+    {
+        var word = BanjoShadowEllipseCode.Code[BanjoShadowEllipseCode.KeepEngineDrawBranchIndex];
+        Assert.Equal(0x40820000u, word & 0xFFFF0003);        // bc 4,2 (bne), relative, no link
+    }
 }

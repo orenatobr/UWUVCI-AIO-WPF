@@ -62,13 +62,17 @@ public static class VcEnginePatches
     /// stack of strips that sample a texture built by reading the frame buffer back (GX2CopySurface RGBA8 to R8); when that
     /// texture is empty each strip is a flat dark quad. The new code (the Cemu pack in tools/graphicpack-bt-shadows, assembled
     /// by tools/ppc-port) is written over the start of a function nothing calls and the 34 calls that bind a texture or draw
-    /// a rectangle are redirected to it. It is made for the F-Zero X (US) base engine and refuses any other.
+    /// a rectangle are redirected to it. With <paramref name="always"/> the ellipse is drawn even where the texture has data. It is made for the F-Zero X (US) base engine and refuses any other.
     /// </summary>
     /// <exception cref="InvalidDataException">The engine is not that engine.</exception>
-    public static byte[] ShadowEllipses(byte[] engine)
+    public static byte[] ShadowEllipses(byte[] engine, bool always = false)
     {
         var copy = (byte[])engine.Clone();
-        var regions = new List<RpxPatcher.Region> { new(BanjoShadowEllipseCode.CaveAddress, null, BanjoShadowEllipseCode.Code) };
+        var code = (uint[])BanjoShadowEllipseCode.Code.Clone();
+        // always: draw the ellipse even when the strip's texture has data (a canvas other than 640 x 480 makes the engine's frame buffer
+        // read-back come out wrong on a console, so its texture holds data that is not the silhouette).
+        if (always) code[BanjoShadowEllipseCode.KeepEngineDrawBranchIndex] = Nop;
+        var regions = new List<RpxPatcher.Region> { new(BanjoShadowEllipseCode.CaveAddress, null, code) };
         foreach (var (address, original, patched) in BanjoShadowEllipseCode.Sites)
             regions.Add(new(address, [original], [patched]));
         try { RpxPatcher.PatchRegions(copy, regions); }

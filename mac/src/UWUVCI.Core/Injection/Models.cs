@@ -47,6 +47,10 @@ public sealed record N64Options
     /// default; a bigger one crashed in Cemu). Null keeps the engine default.
     /// </summary>
     public (int Width, int Height)? Canvas { get; init; }
+    /// <summary>Draw the shadow ellipse even when the strip texture has data (needed with a canvas other than 640 x 480; implies the patch).</summary>
+    public bool ShadowAlways { get; init; }
+    /// <summary>Set false to write [Render] CopyColorBuffer = 0: no frame buffer read-back, which is faster but loses the shadow silhouette and the pause background.</summary>
+    public bool? CopyColorBuffer { get; init; }
     /// <summary>Set false to write [Render] CopyDepthBuffer = 0 (skips copying the depth buffer back; null keeps the default).</summary>
     public bool? CopyDepthBuffer { get; init; }
 }

@@ -19,7 +19,7 @@ public static class N64Injector
         // Prepare the engine patch in memory too, so an engine that cannot take it fails before anything is written.
         string? enginePath = null; byte[]? engine = null;
         bool eeprom16K = N64Profiles.NeedsEeprom16KAnswer(game, header);
-        bool shadows = options.ShadowEllipses ?? N64Profiles.WantsShadowEllipses(game, header);
+        bool shadows = options.ShadowEllipses ?? (options.ShadowAlways || N64Profiles.WantsShadowEllipses(game, header));
         if (eeprom16K || shadows)
         {
             enginePath = Directory.Exists(Path.Combine(baseDir, "code")) ? Directory.GetFiles(Path.Combine(baseDir, "code"), "*.rpx").FirstOrDefault() : null;
@@ -29,7 +29,7 @@ public static class N64Injector
             if (shadows)
             {
                 // Chosen by the game (null): an engine that cannot take it keeps the stock draw. Asked for (true): it is an error.
-                try { engine = VcEnginePatches.ShadowEllipses(engine); }
+                try { engine = VcEnginePatches.ShadowEllipses(engine, options.ShadowAlways); }
                 catch (InvalidDataException) when (options.ShadowEllipses is null) { }
             }
         }
@@ -55,6 +55,7 @@ public static class N64Injector
             var render = new List<(string, string)>();
             if (options.Canvas is { } c) { render.Add(("CanvasWidth", c.Width.ToString())); render.Add(("CanvasHeight", c.Height.ToString())); }
             if (options.CopyDepthBuffer == false) render.Add(("CopyDepthBuffer", "0"));
+            if (options.CopyColorBuffer == false) render.Add(("CopyColorBuffer", "0"));
             File.WriteAllText(iniPath, VcIni.WithRenderKeys(ini, render));
         }
 

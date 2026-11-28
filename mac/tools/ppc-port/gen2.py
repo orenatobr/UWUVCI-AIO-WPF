@@ -39,8 +39,11 @@ cave_end=CAVE+4*len(code)
 assert all(dw(a)==mw(a) for a in range(CAVE,cave_end,4)), 'cave has relocated words'
 def bl(frm,to): return (18<<26|(to-frm)&0x3fffffc|1)&0xffffffff
 rows=[(a-4,dw(a-4),bl(a-4,labs['t%d'%n])) for n,(a,h) in enumerate(sites)]
+items=[x for x in out if x and not x.endswith(':')]
+zi=[i for i,x in enumerate(items) if x=='cmpwi r7, 0'][0]+1
+assert items[zi]=='bne vrel'
 cs=['namespace UWUVCI.Core.Injection;','','// Generated from tools/graphicpack-bt-shadows/patch_btshadows.asm by tools/ppc-port/gen.py; do not edit by hand.',
-'public static class BanjoShadowEllipseCode','{',f'    public const uint CaveAddress = 0x{CAVE:08X};','','    /// <summary>The new code: the hooks plus one small stub per call site (the instruction moved from before the call, then a jump to the hook).</summary>','    public static readonly uint[] Code =','    [']
+'public static class BanjoShadowEllipseCode','{',f'    public const uint CaveAddress = 0x{CAVE:08X};','    /// <summary>Index in <see cref="Code"/> of the bne that keeps the engine draw when a strip texture already has data; a nop there always draws the ellipse.</summary>',f'    public const int KeepEngineDrawBranchIndex = {zi};','','    /// <summary>The new code: the hooks plus one small stub per call site (the instruction moved from before the call, then a jump to the hook).</summary>','    public static readonly uint[] Code =','    [']
 for k in range(0,len(code),6): cs.append('        '+', '.join('0x%08X'%w for w in code[k:k+6])+',')
 cs+=['    ];','','    /// <summary>Per call site: the address of the instruction before the call, its word in the base engine file, and the bl to its stub.</summary>','    public static readonly (uint Address, uint Original, uint Patched)[] Sites =','    [']
 for a,o,n in rows: cs.append(f'        (0x{a:08X}, 0x{o:08X}, 0x{n:08X}),')

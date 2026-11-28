@@ -57,5 +57,27 @@ public static class VcEnginePatches
         return copy;
     }
 
+    /// <summary>
+    /// Returns the engine with Banjo-Tooie's character shadows drawn as translucent ellipses. The engine draws a shadow as a
+    /// stack of strips that sample a texture built by reading the frame buffer back (GX2CopySurface RGBA8 to R8); when that
+    /// texture is empty each strip is a flat dark quad. The new code (the Cemu pack in tools/graphicpack-bt-shadows, assembled
+    /// by tools/ppc-port) is written over the start of a function nothing calls and the 34 calls that bind a texture or draw
+    /// a rectangle are redirected to it. It is made for the F-Zero X (US) base engine and refuses any other.
+    /// </summary>
+    /// <exception cref="InvalidDataException">The engine is not that engine.</exception>
+    public static byte[] ShadowEllipses(byte[] engine)
+    {
+        var copy = (byte[])engine.Clone();
+        var regions = new List<RpxPatcher.Region> { new(BanjoShadowEllipseCode.CaveAddress, null, BanjoShadowEllipseCode.Code) };
+        foreach (var (address, original, patched) in BanjoShadowEllipseCode.Sites)
+            regions.Add(new(address, [original], [patched]));
+        try { RpxPatcher.PatchRegions(copy, regions); }
+        catch (InvalidDataException e)
+        {
+            throw new InvalidDataException("This base's VC engine cannot take the shadow patch (" + e.Message + "). It needs the F-Zero X (US) base.", e);
+        }
+        return copy;
+    }
+
     private static uint[] Exact(uint[] words) => words.Select(_ => 0xFFFFFFFFu).ToArray();
 }

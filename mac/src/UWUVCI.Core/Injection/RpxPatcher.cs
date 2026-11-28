@@ -47,7 +47,38 @@ public static class RpxPatcher
             return found < 0 ? -1 : found + index * 4;
         }, value, "The instruction sequence to patch was not found in the code.");
 
-    private static void Edit(byte[] rpx, Func<byte[], uint, int> locate, uint value, string notFound)
+    /// <summary>One block of instruction words to write at <paramref name="Address"/>; <paramref name="Expected"/> (when given) must be what is there now.</summary>
+    public sealed record Region(uint Address, uint[]? Expected, uint[] Words);
+
+    /// <summary>
+    /// Writes every region (all in the same compressed code section) in one edit of the section. Used to add a block of
+    /// new code in the body of a function the engine never calls and to redirect call sites to it.
+    /// </summary>
+    /// <exception cref="InvalidDataException">A region is not in a code section, differs from its expected words, or the section no longer fits.</exception>
+    public static void PatchRegions(byte[] rpx, IReadOnlyList<Region> regions) =>
+        Edit(rpx, (code, baseAddr) =>
+        {
+            var first = regions[0].Address;
+            if (first < baseAddr || first >= baseAddr + code.Length) return -1;
+            foreach (var r in regions)
+            {
+                long end = (long)r.Address + r.Words.Length * 4L;
+                if (r.Address < baseAddr || end > baseAddr + code.Length)
+                    throw new InvalidDataException($"The region at {r.Address:x8} is not in the same code section as the others.");
+                int q = (int)(r.Address - baseAddr);
+                if (r.Expected is not null)
+                    for (int k = 0; k < r.Expected.Length; k++)
+                    {
+                        uint found = BinaryPrimitives.ReadUInt32BigEndian(code.AsSpan(q + k * 4));
+                        if (found != r.Expected[k])
+                            throw new InvalidDataException($"The code at {r.Address + 4u * (uint)k:x8} is 0x{found:x8}, not the expected 0x{r.Expected[k]:x8}; this is not the VC engine the patch was made for.");
+                    }
+            }
+            return 0;
+        }, 0, "The addresses are not inside a compressed code section.", regions);
+
+    private static void Edit(byte[] rpx, Func<byte[], uint, int> locate, uint value, string notFound,
+        IReadOnlyList<Region>? regions = null)
     {
         if (rpx.Length < 0x40 || rpx[0] != 0x7F || rpx[1] != 'E' || rpx[2] != 'L' || rpx[3] != 'F')
             throw new InvalidDataException("The file is not an RPX (no ELF header).");
@@ -88,7 +119,13 @@ public static class RpxPatcher
                 if (other > secOff && other - secOff < capacity) capacity = other - secOff;
             }
             capacity = Math.Max(capacity, secSize);
-            BinaryPrimitives.WriteUInt32BigEndian(code.AsSpan(p), value);
+            if (regions is null) BinaryPrimitives.WriteUInt32BigEndian(code.AsSpan(p), value);
+            else
+                foreach (var r in regions)
+                {
+                    int q = (int)(r.Address - U32(sh + 12));
+                    for (int k = 0; k < r.Words.Length; k++) BinaryPrimitives.WriteUInt32BigEndian(code.AsSpan(q + k * 4), r.Words[k]);
+                }
 
             byte[]? best = null;
             foreach (var level in new[] { CompressionLevel.Optimal, CompressionLevel.SmallestSize })

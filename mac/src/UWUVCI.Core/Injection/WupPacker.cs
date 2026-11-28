@@ -28,6 +28,14 @@ public static class WupPacker
         if (stray.Length > 0)
             throw new InvalidDataException($"The base folder contains unexpected entries: {string.Join(", ", stray)}.");
 
+        // CNUSPACKER finds app.xml with the path <in> + "\code\app.xml", backslashes included. On Windows that is the file; on
+        // macOS it is a file whose NAME has backslashes in it, which does not exist, so the packer silently used title id 0 and
+        // its default group id, os version and app type. Put a copy of app.xml under that name for the duration of the pack.
+        var appXml = Path.Combine(baseDir, "code", "app.xml");
+        var shim = baseDir.TrimEnd(Path.DirectorySeparatorChar) + "\\code\\app.xml";
+        bool shimmed = !OperatingSystem.IsWindows() && File.Exists(appXml);
+        if (shimmed) File.Copy(appXml, shim, overwrite: true);
+
         // CNUSPACKER reads and writes relative to the working directory.
         var previous = Directory.GetCurrentDirectory();
         try
@@ -37,6 +45,7 @@ public static class WupPacker
         finally
         {
             Directory.SetCurrentDirectory(previous);
+            if (shimmed && File.Exists(shim)) File.Delete(shim);
         }
     }
 }

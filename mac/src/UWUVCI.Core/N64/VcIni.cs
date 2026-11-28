@@ -74,6 +74,20 @@ public static class VcIni
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Adds keys to the <c>[Render]</c> section (created when missing). The engine reads only the first key of a section unless a
+    /// blank line follows it (measured: with CanvasWidth and CanvasHeight on consecutive lines only one took effect, with a blank
+    /// line between them both did), so each added key is followed by a blank line.
+    /// </summary>
+    public static string WithRenderKeys(string ini, IReadOnlyList<(string Key, string Value)> keys)
+    {
+        if (keys.Count == 0) return ini;
+        var block = string.Concat(keys.Select(k => $"{k.Key} = {k.Value}\n\n"));
+        int at = ini.IndexOf("[Render]\n", StringComparison.Ordinal);
+        if (at >= 0) return ini.Insert(at + "[Render]\n".Length, block);
+        return ini.TrimEnd('\n') + "\n\n[Render]\n" + block.TrimEnd('\n') + "\n";
+    }
+
     private static void RejectLineBreaks(string value, string name)
     {
         if (value.AsSpan().IndexOfAny('\r', '\n') >= 0)

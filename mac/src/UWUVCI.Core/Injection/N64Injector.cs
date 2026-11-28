@@ -51,7 +51,11 @@ public static class N64Injector
         }
         else
         {
-            File.WriteAllText(iniPath, VcIni.Build(N64Profiles.For(game, header, options.ExpansionPak, options.SaveType)));
+            var ini = VcIni.Build(N64Profiles.For(game, header, options.ExpansionPak, options.SaveType));
+            var render = new List<(string, string)>();
+            if (options.Canvas is { } c) { render.Add(("CanvasWidth", c.Width.ToString())); render.Add(("CanvasHeight", c.Height.ToString())); }
+            if (options.CopyDepthBuffer == false) render.Add(("CopyDepthBuffer", "0"));
+            File.WriteAllText(iniPath, VcIni.WithRenderKeys(ini, render));
         }
 
         if (engine is not null) File.WriteAllBytes(enginePath!, engine);

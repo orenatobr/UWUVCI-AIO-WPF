@@ -4,6 +4,8 @@ namespace UWUVCI.Core.Injection;
 public static class BanjoShadowEllipseCode
 {
     public const uint CaveAddress = 0x020F0774;
+    /// <summary>Index in <see cref="Code"/> of the bne that keeps the engine draw when a strip texture already has data; a nop there always draws the ellipse.</summary>
+    public const int KeepEngineDrawBranchIndex = 124;
 
     /// <summary>The new code: the hooks plus one small stub per call site (the instruction moved from before the call, then a jump to the hook).</summary>
     public static readonly uint[] Code =

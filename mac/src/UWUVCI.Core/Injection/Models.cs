@@ -42,6 +42,13 @@ public sealed record N64Options
     /// applies it to Banjo-Tooie US when the base engine takes it, true requires it (an engine that cannot is an error), false turns it off.
     /// </summary>
     public bool? ShadowEllipses { get; init; }
+    /// <summary>
+    /// Internal render size of the engine ([Render] CanvasWidth and CanvasHeight), for example 864 x 648 (1.35 times the 640 x 480
+    /// default; a bigger one crashed in Cemu). Null keeps the engine default.
+    /// </summary>
+    public (int Width, int Height)? Canvas { get; init; }
+    /// <summary>Set false to write [Render] CopyDepthBuffer = 0 (skips copying the depth buffer back; null keeps the default).</summary>
+    public bool? CopyDepthBuffer { get; init; }
 }
 
 /// <summary>Progress notification from a running inject.</summary>

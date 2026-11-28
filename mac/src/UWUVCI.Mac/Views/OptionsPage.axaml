@@ -41,6 +41,8 @@
                       AutomationProperties.Name="Widescreen" />
         <ToggleSwitch IsChecked="{Binding Inject.DarkFilter}" OnContent="Remove dark filter" OffContent="Remove dark filter"
                       AutomationProperties.Name="Remove dark filter" />
+        <ToggleSwitch IsChecked="{Binding Inject.ShadowEllipses}" OnContent="Banjo-Tooie shadows as ellipses (US only)" OffContent="Banjo-Tooie shadows as ellipses (US only)"
+                      AutomationProperties.Name="Banjo-Tooie shadows as ellipses" />
       </StackPanel>
     </Border>
 

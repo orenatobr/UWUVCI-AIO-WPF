@@ -475,6 +475,10 @@ public sealed partial class InjectViewModel : ObservableObject
     [ObservableProperty]
     private bool _darkFilter;
 
+    /// <summary>Banjo-Tooie (US) on the F-Zero X base only: draw shadows as translucent ellipses.</summary>
+    [ObservableProperty]
+    private bool _shadowEllipses;
+
     /// <summary>Chosen custom ini, or null.</summary>
     [ObservableProperty]
     private string? _customIniPath;
@@ -648,6 +652,7 @@ public sealed partial class InjectViewModel : ObservableObject
         foreach (var s in ImageSlots) s.Clear();
         WideScreen = false;
         DarkFilter = false;
+        ShadowEllipses = false;
         PakChoice = PakChoice.Auto;
         SaveChoice = SaveChoice.Profile;
         SetCustomIni(null);
@@ -670,6 +675,7 @@ public sealed partial class InjectViewModel : ObservableObject
             SaveType = SaveValue,
             WideScreen = WideScreen,
             DarkFilter = DarkFilter,
+            ShadowEllipses = ShadowEllipses,
         },
         IconPath = Icon.Path,
         TvBootPath = TvBoot.Path,

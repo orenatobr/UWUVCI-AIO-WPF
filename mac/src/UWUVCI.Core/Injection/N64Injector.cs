@@ -18,11 +18,14 @@ public static class N64Injector
 
         // Prepare the engine patch in memory too, so an engine that cannot take it fails before anything is written.
         string? enginePath = null; byte[]? engine = null;
-        if (N64Profiles.NeedsEeprom16KAnswer(game, header))
+        bool eeprom16K = N64Profiles.NeedsEeprom16KAnswer(game, header);
+        if (eeprom16K || options.ShadowEllipses)
         {
             enginePath = Directory.Exists(Path.Combine(baseDir, "code")) ? Directory.GetFiles(Path.Combine(baseDir, "code"), "*.rpx").FirstOrDefault() : null;
             if (enginePath is null) throw new InvalidDataException("The base has no VC engine (.rpx) in code.");
-            engine = VcEnginePatches.SampleBothTextures(VcEnginePatches.AnswerEeprom16K(File.ReadAllBytes(enginePath)));
+            engine = File.ReadAllBytes(enginePath);
+            if (eeprom16K) engine = VcEnginePatches.SampleBothTextures(VcEnginePatches.AnswerEeprom16K(engine));
+            if (options.ShadowEllipses) engine = VcEnginePatches.ShadowEllipses(engine);
         }
 
         var romDir = Path.Combine(baseDir, "content", "rom");

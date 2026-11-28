@@ -59,6 +59,25 @@ public class N64InjectorTests
     }
 
     [Fact]
+    public void Inject_BanjoTooieUs_ShadowPatchIsOnByDefaultAndKeepsTheStockEngineWhenItCannotTakeIt()
+    {
+        using var b = new TestBase();
+        var rpx = WriteEngine(b);
+        N64Injector.Inject(b.Root.FullName, RomFile(b, Z64()), new N64Options());       // the synthetic engine is not the F-Zero X engine: no error
+        Assert.True(File.Exists(rpx));
+    }
+
+    [Fact]
+    public void Inject_BanjoTooie_AskingForTheShadowPatchOnAnotherEngineFails()
+    {
+        using var b = new TestBase();
+        WriteEngine(b);
+        var ex = Assert.Throws<InvalidDataException>(() =>
+            N64Injector.Inject(b.Root.FullName, RomFile(b, Z64()), new N64Options { ShadowEllipses = true }));
+        Assert.Contains("F-Zero X", ex.Message);
+    }
+
+    [Fact]
     public void Inject_BanjoTooie_PatchesAlsoWhenEepromIsChosen()
     {
         using var b = new TestBase();

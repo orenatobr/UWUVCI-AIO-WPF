@@ -24,6 +24,12 @@ for s in raw:
 idx=[k for k,s in enumerate(out) if s=='bla 0x0E01148'][-1]
 assert out[idx+1]=='lwz r0, 0x144(r1)' and out[idx+2]=='mtlr r0'
 out[idx+1:idx+3]=['lwz r12, 0x144(r1)','addi r12, r12, 4','mtlr r12']
+# Keep the original draw when the strip's texture already has data (the engine's frame buffer read-back worked): the
+# ellipse is only a stand-in for an empty (all zero) texture. r9 = texture, r10 = pitch, r18 = width, r19 = rows.
+k=[i for i,s in enumerate(out) if s=='lwz r10, 0x124(r28)'][0]
+assert out[k+1]=='li r29, 0'
+out[k+1:k+1]=['li r29, 0','zy:','mullw r6, r29, r10','add r6, r9, r6','li r30, 0','zx:','lbzx r7, r6, r30','cmpwi r7, 0','bne vrel',
+ 'addi r30, r30, 1','cmpw r30, r18','blt zx','addi r29, r29, 1','cmpw r29, r19','blt zy']
 body=len(out)
 for n,(a,h) in enumerate(sites):
     out.append('t%d:'%n); out.append('.word 0x%08x'%dw(a-4)); out.append('b '+h)

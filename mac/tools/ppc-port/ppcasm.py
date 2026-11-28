@@ -31,6 +31,7 @@ def asm(lines,base,labels_out=None):
         elif mn=='cmpwi': w=11<<26|reg(ops[0])<<16|num(ops[1])&0xffff
         elif mn=='cmpw': w=31<<26|reg(ops[0])<<16|reg(ops[1])<<11
         elif mn in X: w=31<<26|reg(ops[0])<<21|reg(ops[1])<<16|reg(ops[2])<<11|X[mn]<<1
+        elif mn=='lbzx': w=31<<26|reg(ops[0])<<21|reg(ops[1])<<16|reg(ops[2])<<11|87<<1
         elif mn=='stbx': w=31<<26|reg(ops[0])<<21|reg(ops[1])<<16|reg(ops[2])<<11|215<<1
         elif mn=='stfiwx': w=31<<26|reg(ops[0])<<21|num(ops[1])<<16|reg(ops[2])<<11|983<<1
         elif mn=='fctiwz': w=63<<26|reg(ops[0])<<21|reg(ops[1])<<11|15<<1

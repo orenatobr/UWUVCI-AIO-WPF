@@ -37,10 +37,11 @@ public sealed record N64Options
     /// <summary>Remove the darkening overlay of the VC frame.</summary>
     public bool DarkFilter { get; init; }
     /// <summary>
-    /// Banjo-Tooie (US) only: draw each character shadow as a translucent ellipse instead of the dark rectangle that comes
-    /// from the engine's frame buffer read-back (see <see cref="VcEnginePatches.ShadowEllipses"/>). Off by default.
+    /// Banjo-Tooie (US): draw character shadows as translucent ellipses when the strip's texture arrives empty (see
+    /// <see cref="VcEnginePatches.ShadowEllipses"/>); strips that arrive with data are drawn as the engine does. Null (the default)
+    /// applies it to Banjo-Tooie US when the base engine takes it, true requires it (an engine that cannot is an error), false turns it off.
     /// </summary>
-    public bool ShadowEllipses { get; init; }
+    public bool? ShadowEllipses { get; init; }
 }
 
 /// <summary>Progress notification from a running inject.</summary>

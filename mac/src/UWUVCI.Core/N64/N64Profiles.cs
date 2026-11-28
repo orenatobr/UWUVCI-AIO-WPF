@@ -83,6 +83,13 @@ public static class N64Profiles
         return RegionLabel(name, header) == "EU" ? null : BanjoUsFrameCrop;
     }
 
+    /// <summary>True for Banjo-Tooie (US), whose shadows are read back from the frame buffer (see <c>VcEnginePatches.ShadowEllipses</c>).</summary>
+    public static bool WantsShadowEllipses(N64Game? game, RomHeader header)
+    {
+        var name = game?.Name ?? header.Title;
+        return IsBanjoTooie(name) && RegionLabel(name, header) == "US";
+    }
+
     public static bool NeedsEeprom16KAnswer(N64Game? game, RomHeader header) => IsBanjoTooie(game?.Name ?? header.Title);
 
     private static bool IsBanjoTooie(string name) => name.StartsWith("Banjo-Tooie", StringComparison.OrdinalIgnoreCase);

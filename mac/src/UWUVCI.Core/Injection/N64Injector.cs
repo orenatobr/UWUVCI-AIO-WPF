@@ -19,13 +19,19 @@ public static class N64Injector
         // Prepare the engine patch in memory too, so an engine that cannot take it fails before anything is written.
         string? enginePath = null; byte[]? engine = null;
         bool eeprom16K = N64Profiles.NeedsEeprom16KAnswer(game, header);
-        if (eeprom16K || options.ShadowEllipses)
+        bool shadows = options.ShadowEllipses ?? N64Profiles.WantsShadowEllipses(game, header);
+        if (eeprom16K || shadows)
         {
             enginePath = Directory.Exists(Path.Combine(baseDir, "code")) ? Directory.GetFiles(Path.Combine(baseDir, "code"), "*.rpx").FirstOrDefault() : null;
             if (enginePath is null) throw new InvalidDataException("The base has no VC engine (.rpx) in code.");
             engine = File.ReadAllBytes(enginePath);
             if (eeprom16K) engine = VcEnginePatches.SampleBothTextures(VcEnginePatches.AnswerEeprom16K(engine));
-            if (options.ShadowEllipses) engine = VcEnginePatches.ShadowEllipses(engine);
+            if (shadows)
+            {
+                // Chosen by the game (null): an engine that cannot take it keeps the stock draw. Asked for (true): it is an error.
+                try { engine = VcEnginePatches.ShadowEllipses(engine); }
+                catch (InvalidDataException) when (options.ShadowEllipses is null) { }
+            }
         }
 
         var romDir = Path.Combine(baseDir, "content", "rom");

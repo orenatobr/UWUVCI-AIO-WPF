@@ -475,9 +475,9 @@ public sealed partial class InjectViewModel : ObservableObject
     [ObservableProperty]
     private bool _darkFilter;
 
-    /// <summary>Banjo-Tooie (US) on the F-Zero X base only: draw shadows as translucent ellipses.</summary>
+    /// <summary>Banjo-Tooie (US): draw shadows as ellipses where the console's silhouette texture is empty (on by default; it does nothing for other games).</summary>
     [ObservableProperty]
-    private bool _shadowEllipses;
+    private bool _shadowEllipses = true;
 
     /// <summary>Chosen custom ini, or null.</summary>
     [ObservableProperty]
@@ -652,7 +652,7 @@ public sealed partial class InjectViewModel : ObservableObject
         foreach (var s in ImageSlots) s.Clear();
         WideScreen = false;
         DarkFilter = false;
-        ShadowEllipses = false;
+        ShadowEllipses = true;
         PakChoice = PakChoice.Auto;
         SaveChoice = SaveChoice.Profile;
         SetCustomIni(null);
@@ -675,7 +675,7 @@ public sealed partial class InjectViewModel : ObservableObject
             SaveType = SaveValue,
             WideScreen = WideScreen,
             DarkFilter = DarkFilter,
-            ShadowEllipses = ShadowEllipses,
+            ShadowEllipses = ShadowEllipses ? null : false,
         },
         IconPath = Icon.Path,
         TvBootPath = TvBoot.Path,
